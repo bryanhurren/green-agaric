@@ -11,27 +11,36 @@ const navItems = [
 
 <nav class="border-b border-forest-light">
   <div class="container mx-auto px-4">
-    <ul class="flex gap-8 py-4">
-      {navItems.map(({ href, label }) => {
-        const isActive = currentPath === href ||
-          (href !== '/' && currentPath.startsWith(href));
+    <div class="flex items-center justify-between py-4">
+      <a href="/" class="flex-shrink-0" aria-label="Green Agaric Home">
+        <img
+          src="/logo-condensed-green.png"
+          alt="Green Agaric"
+          class="h-12 w-auto"
+        />
+      </a>
+      <ul class="flex gap-8">
+        {navItems.map(({ href, label }) => {
+          const isActive = currentPath === href ||
+            (href !== '/' && currentPath.startsWith(href));
 
-        return (
-          <li>
-            <a
-              href={href}
-              class={`text-lg transition-colors ${
-                isActive
-                  ? 'text-forest-dark font-semibold'
-                  : 'text-forest-base hover:text-forest-dark'
-              }`}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              {label}
-            </a>
-          </li>
-        );
-      })}
-    </ul>
+          return (
+            <li>
+              <a
+                href={href}
+                class={`text-lg transition-colors ${
+                  isActive
+                    ? 'text-forest-dark font-semibold'
+                    : 'text-forest-base hover:text-forest-dark'
+                }`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   </div>
 </nav>

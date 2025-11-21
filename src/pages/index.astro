@@ -10,20 +10,17 @@ const featuredProjects = sortProjectsByOrder(getFeaturedProjects(allProjects));
 
 <BaseLayout title="Green Agaric | Ideas Wandering Off Trail">
   <main class="flex-1">
-    <section class="container mx-auto px-4 py-16 md:py-24">
-      <h1 class="text-5xl md:text-6xl font-bold text-forest-dark mb-4">
-        Green Agaric
-      </h1>
-      <p class="text-2xl md:text-3xl text-forest-base mb-6 font-light italic">
+    <section class="container mx-auto px-4 py-8 md:py-12">
+      <h1 class="text-2xl md:text-3xl text-forest-base mb-6 font-light italic">
         Ideas Wandering Off Trail
-      </p>
+      </h1>
       <p class="text-lg text-earth-base max-w-2xl">
         An AI-first product studio exploring unconventional ideas, new workflows, and emergent systems — with a bias toward building, curiosity, and wandering off trail.
       </p>
     </section>
 
     {featuredProjects.length > 0 && (
-      <section class="bg-moss bg-opacity-5 py-16">
+      <section class="bg-moss bg-opacity-5 py-12">
         <div class="container mx-auto px-4">
           <h2 class="text-3xl font-bold text-forest-dark mb-8">Featured Projects</h2>
           <div class="grid gap-6 md:grid-cols-2">

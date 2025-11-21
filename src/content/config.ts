@@ -9,10 +9,12 @@ const projectsCollection = defineCollection({
       'In Development',
       'Early Prototype',
       'Live',
-      'Archived'
+      'Archived',
+      'Backlog'
     ]),
     order: z.number().int().positive(),
     link: z.string().url().optional(),
+    logo: z.string().optional(),
     featured: z.boolean().default(false),
   }),
 });
