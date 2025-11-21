@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import { getActiveProjects, sortProjectsByOrder } from '@/lib/projects';
+
+const allProjects = await getCollection('projects');
+const activeProjects = getActiveProjects(allProjects);
+const sortedProjects = sortProjectsByOrder(activeProjects);
+
+const pageTitle = 'Projects | Green Agaric';
+const pageDescription = 'Explore our current projects and experiments in AI-first product development';
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="container mx-auto px-4 py-12 flex-1">
+    <h1 class="text-4xl font-bold text-forest-dark mb-4">Projects</h1>
+    <p class="text-lg text-earth-base mb-8">
+      Current explorations and experiments at the intersection of AI, creativity, and product development.
+    </p>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+      {sortedProjects.map(project => (
+        <ProjectCard project={project} />
+      ))}
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,53 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const pageTitle = 'About | Green Agaric';
+const pageDescription = 'Learn about Green Agaric, an AI-first product studio exploring unconventional ideas and new workflows';
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="container mx-auto px-4 py-12 flex-1">
+    <h1 class="text-4xl font-bold text-forest-dark mb-8">About Green Agaric</h1>
+
+    <div class="max-w-3xl space-y-8">
+      <section>
+        <h2 class="text-2xl font-semibold text-forest-dark mb-4">Ideas Wandering Off Trail</h2>
+        <p class="text-earth-base mb-4">
+          Green Agaric is an independent AI-first product studio exploring tools, workflows, and creative systems shaped by modern AI. Rooted in the Pacific Northwest and inspired by the iconic agaric mushrooms found throughout the region, the studio embraces curiosity, experimentation, and the willingness to wander off the expected path.
+        </p>
+        <p class="text-earth-base mb-4">
+          The name reflects two influences: agaric mushrooms — networked, organic, quietly intelligent systems — and classic game culture, a nod to curiosity, exploration, and finding new possibilities.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold text-forest-dark mb-4">What We Build</h2>
+        <p class="text-earth-base mb-4">
+          Green Agaric builds across a wide landscape of ideas, including:
+        </p>
+        <ul class="list-disc list-inside text-earth-base space-y-2 mb-4">
+          <li><strong>Merchery</strong> — direct-to-fan tools helping independent artists build meaningful communities</li>
+          <li><strong>Citizenship AI</strong> — a conversational agent simplifying U.S. immigration processes</li>
+          <li><strong>AI Developer Tools & Workflows</strong> — experiments using Claude Code, multimodal models, and agentic patterns</li>
+          <li><strong>Music-tech & Creative Utilities</strong> — small tools for fan engagement and artistic expression</li>
+        </ul>
+        <p class="text-earth-base">
+          Green Agaric is a studio for exploration, inventive thinking, and hands-on building — a space where ideas can take their own path.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold text-forest-dark mb-4">The Founder</h2>
+        <p class="text-earth-base mb-4">
+          Founded in November 2025 and based in Seattle, WA, Green Agaric is led by a product and platform leader with more than a decade building developer ecosystems, APIs, and large-scale consumer products at Amazon, Meta, and ecobee.
+        </p>
+        <p class="text-earth-base mb-4">
+          The studio's ethos centers on treating AI as the foundation of a product rather than an add-on, exploring how AI reshapes the way we build software through hands-on experimentation and rapid prototyping.
+        </p>
+        <p class="text-earth-base">
+          Focus areas include AI-native product design, developer tools and platform strategy, agentic workflows and emergent system behavior, and early-stage prototyping and exploration.
+        </p>
+      </section>
+    </div>
+  </main>
+</BaseLayout>

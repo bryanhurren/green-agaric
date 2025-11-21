@@ -1,0 +1,37 @@
+---
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { href: '/', label: 'Home' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+];
+---
+
+<nav class="border-b border-forest-light">
+  <div class="container mx-auto px-4">
+    <ul class="flex gap-8 py-4">
+      {navItems.map(({ href, label }) => {
+        const isActive = currentPath === href ||
+          (href !== '/' && currentPath.startsWith(href));
+
+        return (
+          <li>
+            <a
+              href={href}
+              class={`text-lg transition-colors ${
+                isActive
+                  ? 'text-forest-dark font-semibold'
+                  : 'text-forest-base hover:text-forest-dark'
+              }`}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</nav>
