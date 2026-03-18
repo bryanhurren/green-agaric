@@ -340,6 +340,10 @@
       flex-shrink: 0;
     }
 
+    .bar-row--highlight .bar-label { color: var(--text); font-weight: 600; }
+    .bar-row--highlight .bar-count { color: var(--text); font-weight: 600; }
+    .bar-row--highlight .bar-track { height: 8px; }
+
     /* ── EMPLOYER / FIRM LISTS ── */
     .company-list {
       display: flex;
@@ -661,7 +665,7 @@ superinterviews.com
   let state = {
     snapshotIndex: 0,
     regionFilter: 'All',
-    activeLevels: new Set(['Entry', 'Mid', 'Senior', 'Executive']),
+    sortBy: 'total',
   };
 
   // ── HELPERS ──
@@ -781,11 +785,18 @@ superinterviews.com
       `<button class="filter-btn${state.regionFilter === r ? ' active' : ''}" data-region="${r}">${r}</button>`
     ).join('');
 
-    const levelBtns = levels.map(l =>
-      `<button class="level-btn${state.activeLevels.has(l) ? ' active' : ''}" data-level="${l}">${l}</button>`
+    const sortOptions = [
+      { key: 'total',     label: 'Total' },
+      { key: 'Entry',     label: 'Entry' },
+      { key: 'Mid',       label: 'Mid' },
+      { key: 'Senior',    label: 'Senior' },
+      { key: 'Executive', label: 'Executive' },
+    ];
+    const levelBtns = sortOptions.map(o =>
+      `<button class="level-btn${state.sortBy === o.key ? ' active' : ''}" data-sort="${o.key}">${o.label}</button>`
     ).join('');
 
-    // Sort markets: US first, then Canada, then LATAM; within each, by total desc
+    // Sort markets: by region first (US → Canada → LATAM), then by selected level/total desc
     const regionOrder = ['US', 'Canada', 'LATAM'];
     const filtered = Object.entries(snap.markets)
       .filter(([, m]) => state.regionFilter === 'All' || m.region === state.regionFilter)
@@ -793,7 +804,9 @@ superinterviews.com
         const rA = regionOrder.indexOf(a[1].region);
         const rB = regionOrder.indexOf(b[1].region);
         if (rA !== rB) return rA - rB;
-        return b[1].total - a[1].total;
+        const valA = state.sortBy === 'total' ? a[1].total : (a[1][state.sortBy] || 0);
+        const valB = state.sortBy === 'total' ? b[1].total : (b[1][state.sortBy] || 0);
+        return valB - valA;
       });
 
     // Group markets by region with headers
@@ -807,40 +820,31 @@ superinterviews.com
       return header + buildMarketCard(name, m, gmax);
     }).join('');
 
-    const legend = ['Entry','Mid','Senior','Executive'].map(l => `
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--${levelClass(l)})"></div>
-        <span>${l}</span>
-      </div>`).join('');
-
     return `
       <div class="section">
         <div class="section-label">Markets</div>
         <div class="filter-row-label">Filter by region</div>
         <div class="filter-row" id="region-filters">${regionBtns}</div>
-        <div class="filter-row-label">Filter by level</div>
+        <div class="filter-row-label">Sort by</div>
         <div class="filter-row" id="level-filters">${levelBtns}</div>
-        <div class="level-legend">${legend}</div>
         <div id="market-cards">${marketCards}</div>
       </div>
     `;
   }
 
   function buildMarketCard(name, m, gmax) {
-    const levels = ['Entry', 'Mid', 'Senior', 'Executive'];
     const levelKeys = ['Entry', 'Mid', 'Senior', 'Executive'];
 
-    const bars = levelKeys
-      .filter(l => state.activeLevels.has(l))
-      .map(l => {
-        const pct = gmax > 0 ? (m[l] / gmax) * 100 : 0;
-        return `
-          <div class="bar-row">
-            <span class="bar-label">${l}</span>
-            <div class="bar-track"><div class="bar-fill ${levelClass(l)}" style="width:${pct.toFixed(1)}%"></div></div>
-            <span class="bar-count">${fmtNum(m[l])}</span>
-          </div>`;
-      }).join('');
+    const bars = levelKeys.map(l => {
+      const pct = gmax > 0 ? (m[l] / gmax) * 100 : 0;
+      const highlighted = state.sortBy === l;
+      return `
+        <div class="bar-row${highlighted ? ' bar-row--highlight' : ''}">
+          <span class="bar-label">${l}</span>
+          <div class="bar-track"><div class="bar-fill ${levelClass(l)}" style="width:${pct.toFixed(1)}%"></div></div>
+          <span class="bar-count">${fmtNum(m[l])}</span>
+        </div>`;
+    }).join('');
 
     const totalPct = gmax > 0 ? (m.total / gmax) * 100 : 0;
     const totalBar = `
@@ -987,16 +991,10 @@ superinterviews.com
       });
     });
 
-    // Level toggle buttons
-    document.querySelectorAll('[data-level]').forEach(btn => {
+    // Sort buttons
+    document.querySelectorAll('[data-sort]').forEach(btn => {
       btn.addEventListener('click', e => {
-        const level = e.currentTarget.dataset.level;
-        if (state.activeLevels.has(level)) {
-          // Don't allow deselecting all levels
-          if (state.activeLevels.size > 1) state.activeLevels.delete(level);
-        } else {
-          state.activeLevels.add(level);
-        }
+        state.sortBy = e.currentTarget.dataset.sort;
         render();
       });
     });
