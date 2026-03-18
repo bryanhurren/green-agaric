@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Replicant Pricing Configurator</title>
+<style>
+  :root {
+    --brand: #1a1a2e;
+    --accent: #4f46e5;
+    --bg: #f0f2f7;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --subtle: #f1f5f9;
+    --hs: #6366f1;
+    --hs-light: #ede9fe;
+    --ls: #0891b2;
+    --ls-light: #e0f2fe;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  header { background: var(--brand); color: white; padding: 15px 32px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 1.05rem; font-weight: 600; }
+  .hbadge { font-size: 0.72rem; opacity: 0.5; background: rgba(255,255,255,0.12); padding: 3px 10px; border-radius: 12px; }
+
+  .page { max-width: 1320px; margin: 0 auto; padding: 24px 24px 48px; }
+
+  /* ── Cards / layout ── */
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .row4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .mb { margin-bottom: 16px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+
+  .seg-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .seg-head { padding: 13px 18px; display: flex; align-items: center; justify-content: space-between; }
+  .seg-card.hs .seg-head { background: var(--hs-light); border-bottom: 2px solid var(--hs); }
+  .seg-card.ls .seg-head { background: var(--ls-light); border-bottom: 2px solid var(--ls); }
+  .seg-title { font-size: 0.95rem; font-weight: 800; }
+  .seg-card.hs .seg-title { color: var(--hs); }
+  .seg-card.ls .seg-title { color: var(--ls); }
+  .seg-subtitle { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+  .seg-count { font-size: 1.5rem; font-weight: 900; line-height: 1; }
+  .seg-card.hs .seg-count { color: var(--hs); }
+  .seg-card.ls .seg-count { color: var(--ls); }
+  .seg-count-lbl { font-size: 0.65rem; color: var(--muted); text-align: right; }
+  .seg-body { padding: 16px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+
+  /* ── Field / slider ── */
+  .field-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 5px; }
+  .sl { display: flex; align-items: center; gap: 8px; }
+  .sl input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+  .sv { font-size: 0.82rem; font-weight: 700; color: var(--accent); min-width: 88px; text-align: right; white-space: nowrap; }
+  .sv.ls-color { color: var(--ls); }
+
+  /* ── Section label ── */
+  .slbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
+
+  /* ── Toggle ── */
+  .tg { display: flex; background: var(--subtle); border-radius: 8px; padding: 3px; gap: 2px; }
+  .tg button { flex: 1; border: none; background: transparent; padding: 6px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 500; cursor: pointer; color: var(--muted); transition: all 0.15s; white-space: nowrap; }
+  .tg button.active { background: white; color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 700; }
+
+  /* ── Results ── */
+  .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .result-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .result-card.full { grid-column: span 2; }
+  .result-card.accent { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.07); }
+  .result-card h2 { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 12px; }
+
+  .acv-hero { display: flex; align-items: flex-end; gap: 14px; margin-bottom: 12px; }
+  .acv-big { font-size: 2.4rem; font-weight: 900; color: var(--accent); line-height: 1; }
+  .acv-meta { font-size: 0.78rem; color: var(--muted); line-height: 1.9; }
+  .acv-track { height: 9px; background: var(--subtle); border-radius: 99px; position: relative; overflow: visible; }
+  .acv-fill { height: 100%; border-radius: 99px; transition: width 0.3s, background 0.3s; max-width: 100%; }
+  .acv-marker { position: absolute; top: -5px; width: 2px; height: 19px; background: #94a3b8; border-radius: 1px; }
+  .acv-marker::after { content: '$25k target'; position: absolute; top: 21px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
+  .badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 11px; }
+
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; }
+  .bg  { background: #d1fae5; color: #065f46; }
+  .by  { background: #fef3c7; color: #92400e; }
+  .bb  { background: #dbeafe; color: #1e40af; }
+  .bp  { background: #ede9fe; color: #5b21b6; }
+  .bm  { background: #f1f5f9; color: #64748b; }
+  .bcy { background: #cffafe; color: #155e75; }
+
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.82rem; gap: 8px; }
+  .row:last-child { border-bottom: none; }
+  .row .lbl { color: var(--muted); flex: 1; }
+  .row .val { font-weight: 600; white-space: nowrap; }
+  .row.tot { border-top: 2px solid var(--border); border-bottom: none; margin-top: 5px; padding-top: 9px; }
+  .row.tot .lbl { font-weight: 700; color: var(--text); }
+  .row.tot .val { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
+
+  /* ── Scenario table ── */
+  .stbl { width: 100%; border-collapse: collapse; }
+  .stbl th { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 5px 11px; border-bottom: 2px solid var(--border); text-align: left; }
+  .stbl th.r { text-align: right; }
+  .stbl td { padding: 10px 11px; border-bottom: 1px solid var(--border); font-size: 0.85rem; vertical-align: middle; }
+  .stbl td.r { text-align: right; font-weight: 600; }
+  .stbl tr:last-child td { border-bottom: none; }
+  .stbl tr.hl td { background: #f5f3ff; }
+  .big { font-size: 1rem; font-weight: 800; color: var(--accent); }
+  .sub { font-size: 0.7rem; color: var(--muted); display: block; font-weight: 400; }
+
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+  .note { font-size: 0.72rem; color: var(--muted); padding: 2px 0 5px 10px; }
+  .disclaimer { font-size: 0.71rem; color: var(--muted); margin-top: 18px; line-height: 1.6; padding: 11px 15px; background: var(--subtle); border-radius: 8px; }
+
+  /* ── Custom tooltip ── */
+  [data-tip] { cursor: help; border-bottom: 1px dashed var(--muted); }
+  #tooltip {
+    position: fixed; z-index: 9999; pointer-events: none;
+    background: #1e293b; color: #f8fafc;
+    font-size: 0.75rem; line-height: 1.5;
+    padding: 7px 11px; border-radius: 7px;
+    max-width: 280px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    opacity: 0; transition: opacity 0.12s;
+    white-space: normal;
+  }
+
+  select { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.83rem; background: white; color: var(--text); cursor: pointer; outline: none; }
+  select:focus { border-color: var(--accent); }
+
+  .divider-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); background: var(--bg); padding: 0 8px; position: relative; text-align: center; margin: 10px 0; }
+  .divider-label::before { content:''; position:absolute; left:0; right:0; top:50%; height:1px; background:var(--border); z-index:0; }
+  .divider-label span { position:relative; z-index:1; }
+</style>
+</head>
+<body>
+
+<script>
+  if (sessionStorage.getItem('replicant_auth') !== '1') {
+    window.location.href = '/replicant/pricing-gate.html';
+  }
+</script>
+<div id="tooltip"></div>
+<header>
+  <h1>Replicant Pricing Configurator</h1>
+  <span class="hbadge">Internal Use Only</span>
+</header>
+
+<div class="page">
+
+  <!-- ══ ROW 1: Volume + Pricing Rates ══ -->
+  <div class="row2 mb">
+
+    <!-- Volume -->
+    <div class="card">
+      <div class="slbl">Hiring Volume — Next 12 Months</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;">
+        <div>
+          <div class="field-label">Total jobs to fill</div>
+          <div class="sl">
+            <input type="range" id="totalJobs" min="1" max="60" value="24" oninput="update()">
+            <span class="sv" id="totalJobsVal" style="font-size:1.1rem;min-width:70px;">24</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Avg. applicants / job</div>
+          <div class="sl">
+            <input type="range" id="appPerJob" min="10" max="300" value="60" step="10" oninput="update()">
+            <span class="sv" id="appPerJobVal">60</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Qual. rate (% of applicants who qualify)</div>
+          <div class="sl">
+            <input type="range" id="qualRate" min="1" max="40" value="10" step="1" oninput="update()">
+            <span class="sv" id="qualRateVal">10%</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Qualified candidates / job</div>
+          <div style="font-size:1.3rem;font-weight:900;color:var(--accent);margin-top:4px;" id="qualCountVal">6</div>
+          <div style="font-size:0.7rem;color:var(--muted);">derived: applicants × qual rate</div>
+        </div>
+        <div style="grid-column:span 2;"><hr class="div"></div>
+        <div>
+          <div class="field-label">DIY: recruiter hourly rate</div>
+          <div class="sl"><input type="range" id="recHourly" min="25" max="150" value="60" step="5" oninput="update()"><span class="sv" id="recHourlyVal">$60/hr</span></div>
+        </div>
+        <div>
+          <div class="field-label">DIY: hrs spent per hire</div>
+          <div class="sl"><input type="range" id="recHours" min="10" max="120" value="40" step="5" oninput="update()"><span class="sv" id="recHoursVal">40 hrs</span></div>
+        </div>
+        <div>
+          <div class="field-label">DIY: job ad spend / role</div>
+          <div class="sl"><input type="range" id="adSpend" min="0" max="1000" value="300" step="50" oninput="update()"><span class="sv" id="adSpendVal">$300</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing Rates -->
+    <div class="card">
+      <div class="slbl">Pricing Rates</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;">
+        <div>
+          <div class="field-label">Screen-only: flat fee / role</div>
+          <div class="sl">
+            <input type="range" id="screenFeePerRole" min="500" max="8000" value="2000" step="100" oninput="update()">
+            <span class="sv" id="screenFeeVal">$2,000</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Sourced: % of salary (per hire)</div>
+          <div class="sl">
+            <input type="range" id="sourcePct" min="3" max="20" value="10" step="0.5" oninput="update()">
+            <span class="sv" id="sourcePctVal">10%</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">On-demand premium vs subscription</div>
+          <div class="sl">
+            <input type="range" id="odPremium" min="10" max="80" value="25" step="5" oninput="update()">
+            <span class="sv" id="odPremiumVal" data-tip="Typically 20–30% is the standard premium for monthly vs. annual billing in B2B SaaS.">+25%</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Annual commit discount</div>
+          <div class="sl">
+            <input type="range" id="annualDiscount" min="0" max="30" value="15" step="1" oninput="update()">
+            <span class="sv" id="annualDiscountVal">15%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ ROW 2: Segment Cards ══ -->
+  <div class="row2 mb">
+
+    <!-- HIGH SKILL -->
+    <div class="seg-card hs">
+      <div class="seg-head">
+        <div>
+          <div class="seg-title">High-Skill</div>
+          <div class="seg-subtitle">Specialist · Manager · Director+</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="seg-count" id="hs-count">7</div>
+          <div class="seg-count-lbl">jobs</div>
+        </div>
+      </div>
+      <div class="seg-body">
+        <div>
+          <div class="field-label">% of total jobs</div>
+          <div class="sl"><input type="range" id="hs-pct" min="0" max="100" value="30" step="5" oninput="update()"><span class="sv" id="hs-pct-val">30%</span></div>
+        </div>
+        <div>
+          <div class="field-label">% we source (from pool)</div>
+          <div class="sl"><input type="range" id="hs-src" min="0" max="100" value="0" step="5" oninput="update()"><span class="sv" id="hs-src-val">0% · 0 jobs</span></div>
+        </div>
+        <div>
+          <div class="field-label">Avg salary — US</div>
+          <div class="sl"><input type="range" id="hs-sal-us" min="60" max="300" value="110" step="5" oninput="update()"><span class="sv" id="hs-sal-us-val">$110k</span></div>
+        </div>
+        <div>
+          <div class="field-label">Avg salary — Offshore</div>
+          <div class="sl"><input type="range" id="hs-sal-off" min="15" max="120" value="40" step="5" oninput="update()"><span class="sv" id="hs-sal-off-val">$40k</span></div>
+        </div>
+        <div style="grid-column:span 2;">
+          <div class="field-label">% offshored</div>
+          <div class="sl"><input type="range" id="hs-off" min="0" max="100" value="0" step="5" oninput="update()"><span class="sv" id="hs-off-val">0% · 0 jobs</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW SKILL -->
+    <div class="seg-card ls">
+      <div class="seg-head">
+        <div>
+          <div class="seg-title">Low-Skill</div>
+          <div class="seg-subtitle">Staff · Coordinator · Individual Contributor</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="seg-count" id="ls-count">17</div>
+          <div class="seg-count-lbl">jobs</div>
+        </div>
+      </div>
+      <div class="seg-body">
+        <div>
+          <div class="field-label">% of total jobs</div>
+          <div class="sl">
+            <span style="font-size:0.78rem;color:var(--muted);flex:1;font-style:italic;">Remainder of total</span>
+            <span class="sv ls-color" id="ls-pct-val">70%</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">% we source (from pool)</div>
+          <div class="sl"><input type="range" id="ls-src" min="0" max="100" value="0" step="5" oninput="update()"><span class="sv" id="ls-src-val">0% · 0 jobs</span></div>
+        </div>
+        <div>
+          <div class="field-label">Avg salary — US</div>
+          <div class="sl"><input type="range" id="ls-sal-us" min="25" max="120" value="55" step="5" oninput="update()"><span class="sv" id="ls-sal-us-val">$55k</span></div>
+        </div>
+        <div>
+          <div class="field-label">Avg salary — Offshore</div>
+          <div class="sl"><input type="range" id="ls-sal-off" min="10" max="60" value="20" step="5" oninput="update()"><span class="sv" id="ls-sal-off-val">$20k</span></div>
+        </div>
+        <div style="grid-column:span 2;">
+          <div class="field-label">% offshored</div>
+          <div class="sl"><input type="range" id="ls-off" min="0" max="100" value="0" step="5" oninput="update()"><span class="sv" id="ls-off-val">0% · 0 jobs</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ ROW 3: Volume discount + Platform fee + Modifiers ══ -->
+  <div class="row3 mb">
+
+    <div class="card">
+      <div class="slbl">Volume Discount (Subscription)</div>
+      <div style="margin-bottom:12px;">
+        <div class="field-label">Discount threshold (jobs/yr)</div>
+        <div class="sl"><input type="range" id="volThresh" min="3" max="48" value="24" step="1" oninput="update()"><span class="sv" id="volThreshVal">24 jobs/yr</span></div>
+        <div class="note" id="volThreshNote">At or above this volume, discount applies.</div>
+      </div>
+      <div>
+        <div class="field-label">Discount amount</div>
+        <div class="sl"><input type="range" id="volDiscount" min="0" max="40" value="20" step="5" oninput="update()"><span class="sv" id="volDiscountVal">20%</span></div>
+        <div class="note" id="volDiscNote"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="slbl">Platform Fee <span id="platformTierBadge" style="margin-left:6px;"></span></div>
+      <div class="note" style="margin-bottom:10px;">Always required. Subscription gets annual commit discount. On-demand billed per month used. Enterprise auto-applies at &gt;12 jobs/yr.</div>
+      <div style="margin-bottom:10px;">
+        <div class="field-label">Standard monthly fee</div>
+        <div class="sl"><input type="range" id="pfStandard" min="0" max="3000" value="500" step="50" oninput="update()"><span class="sv" id="pfStandardVal">$500/mo</span></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div class="field-label">Enterprise monthly fee</div>
+        <div class="sl"><input type="range" id="pfEnterprise" min="0" max="3000" value="1000" step="50" oninput="update()"><span class="sv" id="pfEnterpriseVal" data-tip="For mid-market ATS (Greenhouse, Lever), typically platform fee is 30–50% and variable is 50–70%.">$1,000/mo</span></div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="field-label">Enterprise threshold (jobs/yr)</div>
+        <div class="sl"><input type="range" id="pfThreshold" min="1" max="36" value="12" step="1" oninput="update()"><span class="sv" id="pfThresholdVal">12 jobs/yr</span></div>
+      </div>
+      <div>
+        <div class="field-label">On-demand: months platform used</div>
+        <div class="sl"><input type="range" id="odMonths" min="1" max="12" value="3" step="1" oninput="update()"><span class="sv" id="odMonthsVal">3 months</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="slbl">Modifiers</div>
+      <div style="margin-bottom:10px;">
+        <div class="field-label">Guarantee</div>
+        <div class="tg" id="guarTg">
+          <button class="active" onclick="setGuar('standard')">30-day</button>
+          <button onclick="setGuar('extended')">90-day +20%</button>
+          <button onclick="setGuar('premium')">1-yr +40%</button>
+        </div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div class="field-label">Rush Delivery</div>
+        <div class="tg" id="rushTg">
+          <button class="active" onclick="setRush('standard')">~30d</button>
+          <button onclick="setRush('rush')">2wk +25%</button>
+          <button onclick="setRush('superrush')">1wk +50%</button>
+        </div>
+      </div>
+      <div>
+        <div class="field-label">Offshore Market</div>
+        <select id="offMkt" onchange="update()">
+          <option value="latam">Latin America (Argentina, etc.)</option>
+          <option value="sea">Southeast Asia (Philippines, etc.)</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ RESULTS ══ -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <div class="result-card">
+      <h2>Commitment Scenarios — Side by Side</h2>
+      <table class="stbl" id="scenarioTbl"></table>
+      <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);" id="qualCandidateNote"></div>
+    </div>
+
+    <div class="row2">
+      <div class="result-card">
+        <h2>Market Benchmarks (cost per hire, blended)</h2>
+        <div id="benchmarks"></div>
+      </div>
+      <div class="result-card">
+        <h2>Mix Summary</h2>
+        <div id="mixSummary"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="disclaimer">
+    <strong>Internal use only.</strong> Pricing guide for account-level discussions. $25k ACV target calibrated to ~24 US mid-market roles/year on subscription. Screen-only priced as flat fee per role (with skill/location multipliers). Sourced roles priced as % of salary. On-demand rates carry a configurable premium. Implied cost per qualified candidate is back-calculated from applicants × qual rate.
+  </div>
+
+</div>
+
+<script>
+const S = {
+  totalJobs: 24, appPerJob: 60, qualRate: 10,
+  screenFeePerRole: 2000,
+  sourcePct: 10,
+  odPremium: 25,
+  annualDiscount: 15,
+  volThresh: 24,
+  volDiscount: 20,
+  pfStandard: 500,
+  pfEnterprise: 1000,
+  pfThreshold: 12,
+  odMonths: 3,
+  recHourly: 60,
+  recHours: 40,
+  adSpend: 300,
+  hs: { pct: 30, src: 0, salUS: 110, salOff: 40, off: 0 },
+  ls: { pct: 70, src: 0, salUS: 55,  salOff: 20, off: 0 },
+  guarantee: 'standard',
+  rush: 'standard',
+  offMkt: 'latam',
+};
+
+const G_MULT = { standard: 1.0, extended: 1.2, premium: 1.4 };
+const R_MULT = { standard: 1.0, rush: 1.25, superrush: 1.5 };
+// Skill multiplier applies to screen-only flat fee
+const SKILL_MULT = { hs: 1.5, ls: 1.0 };
+
+function setGuar(v) { S.guarantee = v; act('guarTg', ['standard','extended','premium'].indexOf(v)); update(); }
+function setRush(v) { S.rush = v; act('rushTg', ['standard','rush','superrush'].indexOf(v)); update(); }
+function act(id, i) { document.getElementById(id).querySelectorAll('button').forEach((b,j) => b.classList.toggle('active', i===j)); }
+
+// ── Cost per hire for one sub-segment ─────────────────────────────────────
+// mode: 'screen' | 'source'
+// commitMult: 1.0 for subscription, (1+odPremium/100) for on-demand
+// volMult: (1-volDiscount/100) if volume qualifies, else 1.0
+function cph({ mode, salaryK, skill, gm, rm, cm, vm }) {
+  const base = mode === 'screen'
+    ? S.screenFeePerRole * skill * gm * rm
+    : salaryK * 1000 * (S.sourcePct / 100) * skill * gm * rm;
+  return base * cm * vm;
+}
+
+// ── Total fee for a given commit multiplier, vol mult, and platform months ─
+// platformMonths: 0 = no platform, 12 = full year, 3 = on-demand 3 months, etc.
+// platformDiscountMult: 1.0 = full price, (1-annualDiscount/100) = discounted
+function calcTotal(cm, vm, platformMonths, platformDiscountMult) {
+  const T = S.totalJobs;
+  const gm = G_MULT[S.guarantee];
+  const rm = R_MULT[S.rush];
+
+  let recruit = 0;
+  const lines = [];
+
+  ['hs', 'ls'].forEach(seg => {
+    const cfg = S[seg];
+    const skill = SKILL_MULT[seg];
+    const segJobs = T * (cfg.pct / 100);
+    const pOff = cfg.off / 100;
+    const pSrc = cfg.src / 100;
+
+    const usJobs  = segJobs * (1 - pOff);
+    const offJobs = segJobs * pOff;
+
+    const subSegs = [
+      { jobs: usJobs  * (1 - pSrc), mode: 'screen', salaryK: cfg.salUS  },
+      { jobs: usJobs  * pSrc,       mode: 'source', salaryK: cfg.salUS  },
+      { jobs: offJobs * (1 - pSrc), mode: 'screen', salaryK: cfg.salOff },
+      { jobs: offJobs * pSrc,       mode: 'source', salaryK: cfg.salOff },
+    ];
+
+    let segFee = 0;
+    subSegs.forEach(ss => {
+      if (ss.jobs < 0.01) return;
+      segFee += cph({ mode: ss.mode, salaryK: ss.salaryK, skill, gm, rm, cm, vm }) * ss.jobs;
+    });
+
+    recruit += segFee;
+    lines.push({
+      seg, label: seg === 'hs' ? 'High-Skill' : 'Low-Skill',
+      segJobs, segFee,
+      blendedPerHire: segJobs > 0 ? segFee / segJobs : 0,
+    });
+  });
+
+  // Platform fee — auto enterprise above threshold, discounted by platformDiscountMult
+  const isEnterprise = T >= S.pfThreshold;
+  const pfeeMonthly = (isEnterprise ? S.pfEnterprise : S.pfStandard) * platformDiscountMult;
+  const pfeeTotal = pfeeMonthly * platformMonths;
+
+  return { recruit, pfeeTotal, pfeeMonthly, total: recruit + pfeeTotal, lines, isEnterprise };
+}
+
+function fmt(n) { return n >= 1000 ? '$' + (n/1000).toFixed(1).replace(/\.0$/,'') + 'k' : '$' + Math.round(n).toLocaleString(); }
+function fmtF(n) { return '$' + Math.round(n).toLocaleString(); }
+function pct(n) { return (n * 100).toFixed(1) + '%'; }
+
+function update() {
+  // ── Read all inputs ──
+  S.totalJobs        = parseInt(document.getElementById('totalJobs').value);
+  S.appPerJob        = parseInt(document.getElementById('appPerJob').value);
+  S.qualRate         = parseInt(document.getElementById('qualRate').value);
+  S.screenFeePerRole = parseInt(document.getElementById('screenFeePerRole').value);
+  S.sourcePct        = parseFloat(document.getElementById('sourcePct').value);
+  S.odPremium        = parseInt(document.getElementById('odPremium').value);
+  S.annualDiscount   = parseInt(document.getElementById('annualDiscount').value);
+  S.volThresh        = parseInt(document.getElementById('volThresh').value);
+  S.volDiscount      = parseInt(document.getElementById('volDiscount').value);
+  S.pfStandard       = parseInt(document.getElementById('pfStandard').value);
+  S.pfEnterprise     = parseInt(document.getElementById('pfEnterprise').value);
+  S.pfThreshold      = parseInt(document.getElementById('pfThreshold').value);
+  S.odMonths         = parseInt(document.getElementById('odMonths').value);
+  S.recHourly        = parseInt(document.getElementById('recHourly').value);
+  S.recHours         = parseInt(document.getElementById('recHours').value);
+  S.adSpend          = parseInt(document.getElementById('adSpend').value);
+  S.offMkt           = document.getElementById('offMkt').value;
+
+  S.hs.pct    = parseInt(document.getElementById('hs-pct').value);
+  S.ls.pct    = 100 - S.hs.pct;
+  S.hs.src    = parseInt(document.getElementById('hs-src').value);
+  S.hs.salUS  = parseInt(document.getElementById('hs-sal-us').value);
+  S.hs.salOff = parseInt(document.getElementById('hs-sal-off').value);
+  S.hs.off    = parseInt(document.getElementById('hs-off').value);
+  S.ls.src    = parseInt(document.getElementById('ls-src').value);
+  S.ls.salUS  = parseInt(document.getElementById('ls-sal-us').value);
+  S.ls.salOff = parseInt(document.getElementById('ls-sal-off').value);
+  S.ls.off    = parseInt(document.getElementById('ls-off').value);
+
+  const T        = S.totalJobs;
+  const hsJobs   = Math.round(T * S.hs.pct / 100);
+  const lsJobs   = T - hsJobs;
+  const qualPerJob = Math.round(S.appPerJob * S.qualRate / 100);
+  const totalQual  = qualPerJob * T;
+  const offLabel   = S.offMkt === 'latam' ? 'LATAM' : 'SEA';
+  const isEnterprise = T >= S.pfThreshold;
+
+  // Volume multiplier for subscription
+  const volMult = T >= S.volThresh ? (1 - S.volDiscount / 100) : 1.0;
+  // Annual commit multiplier
+  const annualMult = 1 - S.annualDiscount / 100;
+  // On-demand commitment multiplier
+  const odMult = 1 + S.odPremium / 100;
+
+  // ── Update display labels ──
+  document.getElementById('totalJobsVal').textContent    = T;
+  document.getElementById('appPerJobVal').textContent    = S.appPerJob;
+  document.getElementById('qualRateVal').textContent     = S.qualRate + '%';
+  document.getElementById('qualCountVal').textContent    = qualPerJob;
+  document.getElementById('screenFeeVal').textContent    = '$' + S.screenFeePerRole.toLocaleString();
+  document.getElementById('sourcePctVal').textContent    = S.sourcePct + '%';
+  document.getElementById('odPremiumVal').textContent    = '+' + S.odPremium + '%';
+  document.getElementById('odPremiumVal').title          = 'Typically 20–30% is the standard premium for monthly vs. annual billing in B2B SaaS.';
+  document.getElementById('annualDiscountVal').textContent = S.annualDiscount + '%';
+  document.getElementById('volThreshVal').textContent    = S.volThresh + ' jobs/yr';
+  document.getElementById('volDiscountVal').textContent  = S.volDiscount + '%';
+  document.getElementById('pfStandardVal').textContent   = '$' + S.pfStandard + '/mo';
+  document.getElementById('pfEnterpriseVal').textContent = '$' + S.pfEnterprise + '/mo';
+  document.getElementById('pfThresholdVal').textContent  = S.pfThreshold + ' jobs/yr';
+  document.getElementById('odMonthsVal').textContent     = S.odMonths + (S.odMonths === 1 ? ' month' : ' months');
+  document.getElementById('recHourlyVal').textContent    = '$' + S.recHourly + '/hr';
+  document.getElementById('recHoursVal').textContent     = S.recHours + ' hrs';
+  document.getElementById('adSpendVal').textContent      = '$' + S.adSpend;
+
+  document.getElementById('hs-count').textContent   = hsJobs;
+  document.getElementById('ls-count').textContent   = lsJobs;
+  document.getElementById('hs-pct-val').textContent = S.hs.pct + '%';
+  document.getElementById('ls-pct-val').textContent = S.ls.pct + '%';
+  document.getElementById('hs-src-val').textContent  = `${S.hs.src}% · ${Math.round(hsJobs * S.hs.src / 100)} jobs`;
+  document.getElementById('ls-src-val').textContent  = `${S.ls.src}% · ${Math.round(lsJobs * S.ls.src / 100)} jobs`;
+  document.getElementById('hs-sal-us-val').textContent  = '$' + S.hs.salUS + 'k';
+  document.getElementById('hs-sal-off-val').textContent = '$' + S.hs.salOff + 'k';
+  document.getElementById('ls-sal-us-val').textContent  = '$' + S.ls.salUS + 'k';
+  document.getElementById('ls-sal-off-val').textContent = '$' + S.ls.salOff + 'k';
+  document.getElementById('hs-off-val').textContent = `${S.hs.off}% · ${Math.round(hsJobs * S.hs.off / 100)} jobs`;
+  document.getElementById('ls-off-val').textContent = `${S.ls.off}% · ${Math.round(lsJobs * S.ls.off / 100)} jobs`;
+
+  document.getElementById('volThreshNote').textContent = T >= S.volThresh
+    ? `✓ Discount active — ${T} jobs ≥ threshold of ${S.volThresh}`
+    : `Not active — ${T} jobs < threshold of ${S.volThresh}`;
+  document.getElementById('volDiscNote').textContent = T >= S.volThresh
+    ? `Saving ${S.volDiscount}% on all recruiting fees`
+    : `Would apply if you reach ${S.volThresh} jobs/yr`;
+
+  // Platform tier badge
+  document.getElementById('platformTierBadge').innerHTML = isEnterprise
+    ? `<span class="badge bp">Enterprise (${T} jobs ≥ ${S.pfThreshold})</span>`
+    : `<span class="badge bb">Standard (${T} jobs < ${S.pfThreshold})</span>`;
+
+  // ── Calc scenarios ──
+  // platformMonths, platformDiscountMult
+  // 1. Subscription monthly — full price, 12 months
+  const subMonthly = calcTotal(1.0,     volMult, 12, 1.0);
+  // 2. Subscription annual — annual discount on both recruiting + platform, 12 months
+  const subAnnual  = calcTotal(annualMult, volMult, 12, annualMult);
+  // 3. On-demand per hire — OD premium on recruiting, platform for odMonths only, no discount
+  const odPerHire  = calcTotal(odMult,  1.0,     S.odMonths, 1.0);
+
+  const totalSrc = Math.round(T * S.hs.pct / 100 * S.hs.src / 100) + Math.round(T * S.ls.pct / 100 * S.ls.src / 100);
+  const totalOff = Math.round(T * S.hs.pct / 100 * S.hs.off / 100) + Math.round(T * S.ls.pct / 100 * S.ls.off / 100);
+
+  // Shared modifier pills (apply to all scenarios)
+  const sharedPills = [];
+  if (isEnterprise)   sharedPills.push([`Enterprise platform`, 'bp']);
+  if (totalSrc > 0)   sharedPills.push([`${totalSrc} sourced`, 'bp']);
+  if (totalOff > 0)   sharedPills.push([`${totalOff} offshore`, 'bcy']);
+  if (S.guarantee !== 'standard') sharedPills.push([S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']);
+  if (S.rush !== 'standard') sharedPills.push([S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']);
+
+  // ── Scenario table ──
+  // Implied cost per qualified candidate = total recruiting fee / total qualified candidates
+  const subAnnualCPQ  = subAnnual.recruit  / totalQual;
+  const subMonthlyCPQ = subMonthly.recruit / totalQual;
+  const odPerHireCPQ  = odPerHire.recruit  / totalQual;
+
+  function pills(list) {
+    return list.map(([t,c]) => `<span class="badge ${c}" style="margin-right:3px;margin-top:3px;">${t}</span>`).join('');
+  }
+
+  const scenarios = [
+    {
+      name: 'Subscription · Annual Commit',
+      pills: [
+        ...(S.annualDiscount > 0 ? [[`${S.annualDiscount}% annual discount`, 'bg']] : []),
+        ...(volMult < 1 ? [[`${S.volDiscount}% vol discount`, 'bg']] : []),
+        ...sharedPills,
+      ],
+      acv: subAnnual.total,
+      perHire: subAnnual.total / T,
+      cpq: subAnnualCPQ,
+      pfeeLabel: `${fmtF(subAnnual.pfeeTotal)}/yr (${fmtF(subAnnual.pfeeMonthly)}/mo)`,
+      pfee: subAnnual.pfeeTotal,
+      rfee: subAnnual.recruit,
+      badge: 'bg', btxt: 'Best value', hl: true,
+    },
+    {
+      name: 'Subscription · Monthly',
+      pills: [
+        [volMult < 1 ? `${S.volDiscount}% vol discount` : 'No annual commit', volMult < 1 ? 'bg' : 'bm'],
+        ...sharedPills,
+      ],
+      acv: subMonthly.total,
+      perHire: subMonthly.total / T,
+      cpq: subMonthlyCPQ,
+      pfeeLabel: `${fmtF(subMonthly.pfeeTotal)}/yr (${fmtF(subMonthly.pfeeMonthly)}/mo)`,
+      pfee: subMonthly.pfeeTotal,
+      rfee: subMonthly.recruit,
+      badge: 'bb', btxt: 'Flexible', hl: false,
+    },
+    {
+      name: 'On-Demand · Per Hire',
+      pills: [
+        [`+${S.odPremium}% OD premium`, 'by'],
+        [`Platform: ${S.odMonths}mo used`, 'bm'],
+        ...sharedPills,
+      ],
+      acv: odPerHire.total,
+      perHire: odPerHire.total / T,
+      cpq: odPerHireCPQ,
+      pfeeLabel: `${fmtF(odPerHire.pfeeTotal)} (${S.odMonths}mo)`,
+      pfee: odPerHire.pfeeTotal,
+      rfee: odPerHire.recruit,
+      badge: 'by', btxt: `+${S.odPremium}% vs sub`, hl: false,
+    },
+  ];
+
+  // Break-even: how many hires does sub-annual become cheaper than OD per hire?
+  // sub-annual total = pfeeAnnual_discounted + recruitPerHire_sub * n
+  // od total         = pfeeOD + recruitPerHire_od * n
+  // solve: pfeeAnnual_discounted + subRecruitPH*n = pfeeOD + odRecruitPH*n
+  // n = (pfeeAnnual_discounted - pfeeOD) / (odRecruitPH - subRecruitPH)
+  const subRecruitPH = subAnnual.recruit / T;
+  const odRecruitPH  = odPerHire.recruit / T;
+  const breakEvenN   = (subAnnual.pfeeTotal - odPerHire.pfeeTotal) / (odRecruitPH - subRecruitPH);
+  const breakEvenMsg = breakEvenN <= 0
+    ? `Subscription · Annual Commit is cheaper at any volume with this configuration.`
+    : breakEvenN > 200
+    ? `On-Demand is cheaper at any realistic volume with this configuration.`
+    : `Subscription · Annual Commit becomes cheaper than On-Demand at ${Math.ceil(breakEvenN)} hire${Math.ceil(breakEvenN) !== 1 ? 's' : ''}/year. Above that, every hire saves ${fmtF(odRecruitPH - subRecruitPH)}.`;
+
+  document.getElementById('scenarioTbl').innerHTML =
+    `<thead><tr>
+      <th style="width:36%">Scenario</th>
+      <th class="r">Platform Fee</th>
+      <th class="r">Recruiting Fees</th>
+      <th class="r">Annual Total</th>
+      <th class="r">Avg / Hire</th>
+      <th class="r">Implied / Qual Candidate</th>
+      <th></th>
+    </tr></thead><tbody>` +
+    scenarios.map(sc => {
+      const pfeePct = sc.acv > 0 ? (sc.pfee / sc.acv) * 100 : 0;
+      const pfeePctStr = sc.pfee > 0
+        ? `<div style="font-size:0.7rem;font-weight:600;color:${pfeePct > 30 ? '#dc2626' : 'var(--muted)'};">${pfeePct.toFixed(0)}% of total</div>`
+        : '';
+      return `<tr class="${sc.hl ? 'hl' : ''}">
+        <td><strong>${sc.name}</strong><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;">${pills(sc.pills)}</div></td>
+        <td class="r">${sc.pfee > 0 ? sc.pfeeLabel + pfeePctStr : '—'}</td>
+        <td class="r">${fmtF(sc.rfee)}</td>
+        <td class="r"><span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${fmtF(sc.acv / 12)}/mo</div></td>
+        <td class="r">${sc.perHire !== null ? fmtF(sc.perHire) : '—'}</td>
+        <td class="r"><strong>${fmtF(sc.cpq)}</strong></td>
+        <td><span class="badge ${sc.badge}">${sc.btxt}</span></td>
+      </tr>`;
+    }).join('') + '</tbody>';
+
+  document.getElementById('qualCandidateNote').innerHTML =
+    `<span style="color:var(--muted);">Implied cost / qualified candidate: ${S.appPerJob} applicants/job × ${S.qualRate}% qual rate = ${qualPerJob} qual candidates/job · ${totalQual} total across ${T} roles.</span>`
+    + `<div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#166534;font-size:0.78rem;">⚖️ <strong>Break-even:</strong> ${breakEvenMsg}</div>`;
+
+  // ── Benchmarks ──
+  const blendedSal = (
+    S.hs.salUS  * (S.hs.pct / 100) * (1 - S.hs.off / 100) +
+    S.hs.salOff * (S.hs.pct / 100) * (S.hs.off / 100) +
+    S.ls.salUS  * (S.ls.pct / 100) * (1 - S.ls.off / 100) +
+    S.ls.salOff * (S.ls.pct / 100) * (S.ls.off / 100)
+  ) * 1000;
+  const subPH = subAnnual.total / T;
+  const odPH  = odPerHire.total / T;
+  function dl(ours, theirs) {
+    const p = Math.round((1 - ours / theirs) * 100);
+    if (p > 0) return `<span class="badge bg">${p}% cheaper</span>`;
+    if (p < 0) return `<span class="badge by">${Math.abs(p)}% more</span>`;
+    return '';
+  }
+  // DIY cost calculation
+  const diyRecruiterLaborPerHire = S.recHourly * S.recHours;
+  const diyAdPerHire             = S.adSpend;
+  const diyTotalPerHire          = diyRecruiterLaborPerHire + diyAdPerHire;
+  const diyTotalAnnual           = diyTotalPerHire * T;
+  const tradRecruiterFee         = blendedSal * 0.25;
+  const retainedFee              = blendedSal * 0.33;
+
+  document.getElementById('benchmarks').innerHTML = `
+    <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Traditional Agency Recruiter (25%)</span><span class="val">${fmtF(tradRecruiterFee)}/hire</span>${dl(subPH, tradRecruiterFee)}</div>
+    <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Retained Search Firm (33%)</span><span class="val">${fmtF(retainedFee)}/hire</span>${dl(subPH, retainedFee)}</div>
+    <div style="border-top:1px solid var(--border);margin:8px 0 4px;padding-top:6px;">
+      <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">DIY Recruiting (total / hire)</span><span class="val">${fmtF(diyTotalPerHire)}</span>${dl(subPH, diyTotalPerHire)}</div>
+      <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Recruiter labor (${S.recHours}h × $${S.recHourly}/hr)</span><span class="val" style="font-weight:400">${fmtF(diyRecruiterLaborPerHire)}</span></div>
+      <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Job ad spend (LinkedIn/Indeed)</span><span class="val" style="font-weight:400">${fmtF(diyAdPerHire)}</span></div>
+      <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Total annual (${T} hires)</span><span class="val" style="font-weight:400">${fmtF(diyTotalAnnual)}</span></div>
+    </div>
+    <div style="border-top:2px solid var(--border);margin-top:6px;padding-top:8px;">
+      <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Replicant · Subscription / hire</span><span class="val" style="color:var(--accent)">${fmtF(subPH)}</span><span class="badge bb">${((subPH/blendedSal)*100).toFixed(1)}% of 1st yr salary</span>${dl(subPH, diyTotalPerHire)}</div>
+      <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Replicant · On-Demand / hire</span><span class="val" style="color:var(--accent)">${fmtF(odPH)}</span><span class="badge by">${((odPH/blendedSal)*100).toFixed(1)}% of 1st yr salary</span>${dl(odPH, diyTotalPerHire)}</div>
+    </div>`;
+
+  // ── Mix summary ──
+  const mixRows = [
+    { label: 'High-Skill US',         jobs: Math.round(T * S.hs.pct / 100 * (1 - S.hs.off / 100)), sal: S.hs.salUS,  color: '#6366f1' },
+    { label: `High-Skill ${offLabel}`, jobs: Math.round(T * S.hs.pct / 100 * (S.hs.off / 100)),     sal: S.hs.salOff, color: '#a78bfa' },
+    { label: 'Low-Skill US',           jobs: Math.round(T * S.ls.pct / 100 * (1 - S.ls.off / 100)), sal: S.ls.salUS,  color: '#0891b2' },
+    { label: `Low-Skill ${offLabel}`,  jobs: Math.round(T * S.ls.pct / 100 * (S.ls.off / 100)),     sal: S.ls.salOff, color: '#67e8f9' },
+  ].filter(r => r.jobs > 0);
+
+  document.getElementById('mixSummary').innerHTML =
+    mixRows.map(r => `<div class="row">
+      <span class="lbl" style="display:flex;align-items:center;gap:6px;">
+        <span style="width:9px;height:9px;border-radius:2px;background:${r.color};display:inline-block;flex-shrink:0;"></span>${r.label}
+      </span>
+      <span class="val">${r.jobs} jobs</span>
+      <span class="badge bm">$${r.sal}k avg</span>
+    </div>`).join('') +
+    `<div class="row tot">
+      <span class="lbl">Total</span>
+      <span class="val">${T} jobs · ${(T / 12).toFixed(1)}/mo avg</span>
+      <span class="badge bb">${totalSrc} sourced · ${T - totalSrc} screen-only</span>
+    </div>`;
+}
+
+update();
+
+// ── Tooltip ────────────────────────────────────────────────────────────────
+const tip = document.getElementById('tooltip');
+document.addEventListener('mouseover', e => {
+  const el = e.target.closest('[data-tip]');
+  if (!el) return;
+  tip.textContent = el.dataset.tip;
+  tip.style.opacity = '1';
+});
+document.addEventListener('mousemove', e => {
+  if (tip.style.opacity !== '1') return;
+  const x = e.clientX + 14, y = e.clientY + 14;
+  const overRight = x + 290 > window.innerWidth;
+  tip.style.left = (overRight ? e.clientX - 290 : x) + 'px';
+  tip.style.top  = y + 'px';
+});
+document.addEventListener('mouseout', e => {
+  if (!e.target.closest('[data-tip]')) return;
+  tip.style.opacity = '0';
+});
+</script>
+</body>
+</html>
