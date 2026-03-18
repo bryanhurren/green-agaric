@@ -215,17 +215,17 @@
           </div>
         </div>
         <div>
-          <div class="field-label">On-demand premium vs subscription</div>
+          <div class="field-label">Monthly premium vs annual</div>
           <div class="sl">
-            <input type="range" id="odPremium" min="10" max="80" value="25" step="5" oninput="update()">
-            <span class="sv" id="odPremiumVal" data-tip="Typically 20–30% is the standard premium for monthly vs. annual billing in B2B SaaS.">+25%</span>
+            <input type="range" id="monthlyPremium" min="0" max="60" value="25" step="5" oninput="update()">
+            <span class="sv" id="monthlyPremiumVal" data-tip="Monthly billing carries a premium over annual commit — typically 20–30% in B2B SaaS. Annual is the baseline rate.">+25%</span>
           </div>
         </div>
         <div>
-          <div class="field-label">Annual commit discount</div>
+          <div class="field-label">On-demand premium vs annual</div>
           <div class="sl">
-            <input type="range" id="annualDiscount" min="0" max="30" value="15" step="1" oninput="update()">
-            <span class="sv" id="annualDiscountVal">15%</span>
+            <input type="range" id="odPremium" min="0" max="100" value="50" step="5" oninput="update()">
+            <span class="sv" id="odPremiumVal" data-tip="On-demand carries a higher premium than monthly — no platform commitment, pay only for months used. Typically 40–60% over annual.">+50%</span>
           </div>
         </div>
       </div>
@@ -332,7 +332,7 @@
 
     <div class="card">
       <div class="slbl">Platform Fee <span id="platformTierBadge" style="margin-left:6px;"></span></div>
-      <div class="note" style="margin-bottom:10px;">Always required. Subscription gets annual commit discount. On-demand billed per month used. Enterprise auto-applies at &gt;12 jobs/yr.</div>
+      <div class="note" style="margin-bottom:10px;">Always required. Annual commit is the baseline rate. On-demand billed per month used only. Enterprise auto-applies at ≥ threshold jobs/yr.</div>
       <div style="margin-bottom:10px;">
         <div class="field-label">Standard monthly fee</div>
         <div class="sl"><input type="range" id="pfStandard" min="0" max="3000" value="500" step="50" oninput="update()"><span class="sv" id="pfStandardVal">$500/mo</span></div>
@@ -403,7 +403,7 @@
   </div>
 
   <div class="disclaimer">
-    <strong>Internal use only.</strong> Pricing guide for account-level discussions. $25k ACV target calibrated to ~24 US mid-market roles/year on subscription. Screen-only priced as flat fee per role (with skill/location multipliers). Sourced roles priced as % of salary. On-demand rates carry a configurable premium. Implied cost per qualified candidate is back-calculated from applicants × qual rate.
+    <strong>Internal use only.</strong> Pricing guide for account-level discussions. $25k ACV target calibrated to ~24 US mid-market roles/year on annual subscription. Annual commit is the baseline rate; monthly and on-demand carry configurable premiums over it. Screen-only priced as flat fee per role (with skill/location multipliers). Sourced roles priced as % of salary. Implied cost per qualified candidate is back-calculated from applicants × qual rate.
   </div>
 
 </div>
@@ -413,8 +413,8 @@ const S = {
   totalJobs: 24, appPerJob: 60, qualRate: 10,
   screenFeePerRole: 2000,
   sourcePct: 10,
-  odPremium: 25,
-  annualDiscount: 15,
+  monthlyPremium: 25,
+  odPremium: 50,
   volThresh: 24,
   volDiscount: 20,
   pfStandard: 500,
@@ -512,8 +512,8 @@ function update() {
   S.qualRate         = parseInt(document.getElementById('qualRate').value);
   S.screenFeePerRole = parseInt(document.getElementById('screenFeePerRole').value);
   S.sourcePct        = parseFloat(document.getElementById('sourcePct').value);
+  S.monthlyPremium   = parseInt(document.getElementById('monthlyPremium').value);
   S.odPremium        = parseInt(document.getElementById('odPremium').value);
-  S.annualDiscount   = parseInt(document.getElementById('annualDiscount').value);
   S.volThresh        = parseInt(document.getElementById('volThresh').value);
   S.volDiscount      = parseInt(document.getElementById('volDiscount').value);
   S.pfStandard       = parseInt(document.getElementById('pfStandard').value);
@@ -546,10 +546,9 @@ function update() {
 
   // Volume multiplier for subscription
   const volMult = T >= S.volThresh ? (1 - S.volDiscount / 100) : 1.0;
-  // Annual commit multiplier
-  const annualMult = 1 - S.annualDiscount / 100;
-  // On-demand commitment multiplier
-  const odMult = 1 + S.odPremium / 100;
+  // Annual = baseline (1.0×), monthly and OD carry premiums over annual
+  const monthlyMult = 1 + S.monthlyPremium / 100;
+  const odMult      = 1 + S.odPremium / 100;
 
   // ── Update display labels ──
   document.getElementById('totalJobsVal').textContent    = T;
@@ -558,9 +557,8 @@ function update() {
   document.getElementById('qualCountVal').textContent    = qualPerJob;
   document.getElementById('screenFeeVal').textContent    = '$' + S.screenFeePerRole.toLocaleString();
   document.getElementById('sourcePctVal').textContent    = S.sourcePct + '%';
-  document.getElementById('odPremiumVal').textContent    = '+' + S.odPremium + '%';
-  document.getElementById('odPremiumVal').title          = 'Typically 20–30% is the standard premium for monthly vs. annual billing in B2B SaaS.';
-  document.getElementById('annualDiscountVal').textContent = S.annualDiscount + '%';
+  document.getElementById('monthlyPremiumVal').textContent = '+' + S.monthlyPremium + '%';
+  document.getElementById('odPremiumVal').textContent      = '+' + S.odPremium + '%';
   document.getElementById('volThreshVal').textContent    = S.volThresh + ' jobs/yr';
   document.getElementById('volDiscountVal').textContent  = S.volDiscount + '%';
   document.getElementById('pfStandardVal').textContent   = '$' + S.pfStandard + '/mo';
@@ -597,13 +595,14 @@ function update() {
     : `<span class="badge bb">Standard (${T} jobs < ${S.pfThreshold})</span>`;
 
   // ── Calc scenarios ──
-  // platformMonths, platformDiscountMult
-  // 1. Subscription monthly — full price, 12 months
-  const subMonthly = calcTotal(1.0,     volMult, 12, 1.0);
-  // 2. Subscription annual — annual discount on both recruiting + platform, 12 months
-  const subAnnual  = calcTotal(annualMult, volMult, 12, annualMult);
-  // 3. On-demand per hire — OD premium on recruiting, platform for odMonths only, no discount
-  const odPerHire  = calcTotal(odMult,  1.0,     S.odMonths, 1.0);
+  // Annual = baseline (1.0×). Monthly and OD carry premiums over annual.
+  // platformDiscountMult is always 1.0 — annual IS the base rate, no discount applied.
+  // 1. Subscription annual — baseline rate, 12 months platform
+  const subAnnual  = calcTotal(1.0,          volMult, 12,         1.0);
+  // 2. Subscription monthly — monthly premium over annual, 12 months platform
+  const subMonthly = calcTotal(monthlyMult,  volMult, 12,         1.0);
+  // 3. On-demand per hire — OD premium over annual, platform for odMonths only
+  const odPerHire  = calcTotal(odMult,       1.0,     S.odMonths, 1.0);
 
   const totalSrc = Math.round(T * S.hs.pct / 100 * S.hs.src / 100) + Math.round(T * S.ls.pct / 100 * S.ls.src / 100);
   const totalOff = Math.round(T * S.hs.pct / 100 * S.hs.off / 100) + Math.round(T * S.ls.pct / 100 * S.ls.off / 100);
@@ -630,7 +629,7 @@ function update() {
     {
       name: 'Subscription · Annual Commit',
       pills: [
-        ...(S.annualDiscount > 0 ? [[`${S.annualDiscount}% annual discount`, 'bg']] : []),
+        ['Baseline rate', 'bg'],
         ...(volMult < 1 ? [[`${S.volDiscount}% vol discount`, 'bg']] : []),
         ...sharedPills,
       ],
@@ -645,7 +644,8 @@ function update() {
     {
       name: 'Subscription · Monthly',
       pills: [
-        [volMult < 1 ? `${S.volDiscount}% vol discount` : 'No annual commit', volMult < 1 ? 'bg' : 'bm'],
+        [`+${S.monthlyPremium}% vs annual`, 'bb'],
+        ...(volMult < 1 ? [[`${S.volDiscount}% vol discount`, 'bg']] : []),
         ...sharedPills,
       ],
       acv: subMonthly.total,
@@ -659,7 +659,7 @@ function update() {
     {
       name: 'On-Demand · Per Hire',
       pills: [
-        [`+${S.odPremium}% OD premium`, 'by'],
+        [`+${S.odPremium}% vs annual`, 'by'],
         [`Platform: ${S.odMonths}mo used`, 'bm'],
         ...sharedPills,
       ],
@@ -669,14 +669,14 @@ function update() {
       pfeeLabel: `${fmtF(odPerHire.pfeeTotal)} (${S.odMonths}mo)`,
       pfee: odPerHire.pfeeTotal,
       rfee: odPerHire.recruit,
-      badge: 'by', btxt: `+${S.odPremium}% vs sub`, hl: false,
+      badge: 'by', btxt: `+${S.odPremium}% vs annual`, hl: false,
     },
   ];
 
   // Break-even: how many hires does sub-annual become cheaper than OD per hire?
-  // sub-annual total = pfeeAnnual_discounted + recruitPerHire_sub * n
+  // sub-annual total = pfeeAnnual + recruitPerHire_annual * n
   // od total         = pfeeOD + recruitPerHire_od * n
-  // solve: pfeeAnnual_discounted + subRecruitPH*n = pfeeOD + odRecruitPH*n
+  // solve: pfeeAnnual + subRecruitPH*n = pfeeOD + odRecruitPH*n
   // n = (pfeeAnnual_discounted - pfeeOD) / (odRecruitPH - subRecruitPH)
   const subRecruitPH = subAnnual.recruit / T;
   const odRecruitPH  = odPerHire.recruit / T;
