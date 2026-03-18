@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Superinterviews — Hiring Trends Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #0D1117;
+      --surface:  #161B22;
+      --border:   #21262D;
+      --text:     #E6EDF3;
+      --muted:    #7D8590;
+      --accent:   #B0FA7B;
+      --entry:    #58A6FF;
+      --mid:      #B0FA7B;
+      --senior:   #D2A8FF;
+      --exec:     #FFAB70;
+      --us:       #388BFD;
+      --canada:   #F78166;
+      --latam:    #FFAB70;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      color: #0D1117;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .header-text p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── SECTION LABELS ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .section {
+      margin-bottom: 28px;
+    }
+
+    /* ── SNAPSHOT SELECTOR ── */
+    .selector-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .selector-row label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .selector-row select {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 10px;
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237D8590' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+
+    .selector-row select:focus {
+      border-color: var(--accent);
+    }
+
+    /* ── SUMMARY CARDS ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 14px 12px;
+    }
+
+    .card.total {
+      border-color: var(--accent);
+    }
+
+    .card-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .card-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .card.total .card-value {
+      color: var(--accent);
+    }
+
+    .card-sub {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── FILTER BUTTONS ── */
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .filter-btn {
+      padding: 5px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0D1117;
+    }
+
+    .level-btn {
+      padding: 5px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--muted);
+    }
+
+    .level-btn[data-level="Entry"] { --lc: var(--entry); }
+    .level-btn[data-level="Mid"]   { --lc: var(--mid); }
+    .level-btn[data-level="Senior"]{ --lc: var(--senior); }
+    .level-btn[data-level="Executive"] { --lc: var(--exec); }
+
+    .level-btn.active {
+      border-color: var(--lc);
+      color: var(--lc);
+      background: color-mix(in srgb, var(--lc) 12%, transparent);
+    }
+
+    /* ── MARKET CARDS ── */
+    .market-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+
+    .market-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .market-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .market-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .region-pill {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .region-pill.US     { background: color-mix(in srgb, var(--us) 18%, transparent);     color: var(--us);     border: 1px solid color-mix(in srgb, var(--us) 35%, transparent); }
+    .region-pill.Canada { background: color-mix(in srgb, var(--canada) 18%, transparent); color: var(--canada); border: 1px solid color-mix(in srgb, var(--canada) 35%, transparent); }
+    .region-pill.LATAM  { background: color-mix(in srgb, var(--latam) 18%, transparent);  color: var(--latam);  border: 1px solid color-mix(in srgb, var(--latam) 35%, transparent); }
+
+    .market-total {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .bar-row:last-child { margin-bottom: 0; }
+
+    .bar-label {
+      font-size: 10px;
+      font-weight: 500;
+      width: 52px;
+      flex-shrink: 0;
+      color: var(--muted);
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .bar-fill.entry  { background: var(--entry); }
+    .bar-fill.mid    { background: var(--mid); }
+    .bar-fill.senior { background: var(--senior); }
+    .bar-fill.exec   { background: var(--exec); }
+    .bar-fill.total  { background: var(--text); opacity: 0.25; }
+
+    .bar-count {
+      font-size: 10px;
+      color: var(--muted);
+      width: 32px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── EMPLOYER / FIRM LISTS ── */
+    .company-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .company-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .company-rank {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      width: 18px;
+      flex-shrink: 0;
+    }
+
+    .company-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .company-dots {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .dot.entry  { background: var(--entry); }
+    .dot.mid    { background: var(--mid); }
+    .dot.senior { background: var(--senior); }
+    .dot.exec   { background: var(--exec); }
+
+    .company-count {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── SUB-SECTION HEADER ── */
+    .subsection-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+      margin-top: 4px;
+    }
+
+    /* ── LEVEL LEGEND ── */
+    .level-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* ── INFOGRAPHIC IFRAME ── */
+    .infographic-wrapper {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .infographic-wrapper iframe {
+      display: block;
+      width: 1080px;
+      border: none;
+      transform-origin: top left;
+    }
+
+    /* ── LINKEDIN POST ── */
+    .post-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .post-text {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      padding: 9px;
+      background: var(--accent);
+      color: #0D1117;
+      border: none;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .copy-btn:hover { opacity: 0.88; }
+    .copy-btn:active { opacity: 0.75; }
+
+    /* ── METHODOLOGY ── */
+    details {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    summary {
+      padding: 13px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    summary::after {
+      content: '▸';
+      font-size: 12px;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+
+    details[open] summary::after {
+      transform: rotate(90deg);
+    }
+
+    .method-body {
+      padding: 0 16px 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .method-body p, .method-body li {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 8px;
+    }
+
+    .method-body ul {
+      padding-left: 16px;
+      margin-bottom: 8px;
+    }
+
+    .method-body strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .method-body h4 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin: 12px 0 6px;
+    }
+
+    .method-body h4:first-child { margin-top: 0; }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      margin-top: 8px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ── UTILITIES ── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div class="container" id="app">
+  <!-- Rendered by JS -->
+</div>
+
+<script>
+  // ── AUTH GUARD ──
+  if (sessionStorage.getItem('replicant_auth') !== '1') {
+    window.location.href = '/replicant/index.html';
+  }
+
+  // ── DATA ──
+  const SNAPSHOTS = [
+    {
+      slug: "2026-03-17",
+      label: "March 17, 2026",
+      linkedinPost: `29,716 active accounting & finance job postings as of March 17, 2026 — across 20 markets in the US, Canada, and LATAM.
+
+This is our March baseline. April will be the first real month-over-month comparison.
+
+By seniority level:
+- Entry: 8,058
+- Mid: 1,775
+- Senior: 14,640
+- Executive: 5,243
+
+Top US markets: New York (3,663), Dallas (2,329), Atlanta (2,205), Chicago (1,848), Los Angeles (1,821).
+
+Top international markets: Toronto (1,747), Mexico (1,229), Brazil (991), Calgary (677), Vancouver (436).
+
+Top direct employers in sample: Gpac (462), NorthPoint Search Group (125), Maximus (64), Cardinal Health (58).
+
+Top staffing firms in sample: Robert Half (369), Jobot (326), Aston Carter (27).
+
+Methodology note: title-based search covering accounting, bookkeeping, audit, and tax roles — banking, trading, and FP&A are excluded.
+
+We're tracking this monthly with structured API data. Follow for April trends.
+
+---
+
+At Superinterviews, we build AI-powered candidate screening for accounting & finance recruiters. 60+ applicants per role? We help you find the qualified ones faster.
+
+superinterviews.com
+
+#hiring #accounting #finance #recruitingtech #staffing #hiringtrends`,
+      markets: {
+        "New York":      { region: "US",     Entry: 886,  Mid: 133, Senior: 2111, Executive: 533,  total: 3663 },
+        "Dallas":        { region: "US",     Entry: 662,  Mid: 159, Senior: 1256, Executive: 252,  total: 2329 },
+        "Atlanta":       { region: "US",     Entry: 526,  Mid: 191, Senior: 1228, Executive: 260,  total: 2205 },
+        "Chicago":       { region: "US",     Entry: 467,  Mid: 104, Senior: 1080, Executive: 197,  total: 1848 },
+        "Los Angeles":   { region: "US",     Entry: 491,  Mid: 84,  Senior: 977,  Executive: 269,  total: 1821 },
+        "Houston":       { region: "US",     Entry: 523,  Mid: 93,  Senior: 959,  Executive: 140,  total: 1715 },
+        "Toronto":       { region: "Canada", Entry: 438,  Mid: 199, Senior: 959,  Executive: 151,  total: 1747 },
+        "Denver":        { region: "US",     Entry: 418,  Mid: 88,  Senior: 890,  Executive: 218,  total: 1614 },
+        "Boston":        { region: "US",     Entry: 342,  Mid: 65,  Senior: 1003, Executive: 246,  total: 1656 },
+        "San Francisco": { region: "US",     Entry: 253,  Mid: 51,  Senior: 731,  Executive: 239,  total: 1274 },
+        "Phoenix":       { region: "US",     Entry: 377,  Mid: 67,  Senior: 746,  Executive: 294,  total: 1484 },
+        "Charlotte":     { region: "US",     Entry: 239,  Mid: 70,  Senior: 824,  Executive: 85,   total: 1218 },
+        "Mexico":        { region: "LATAM",  Entry: 588,  Mid: 105, Senior: 385,  Executive: 151,  total: 1229 },
+        "Minneapolis":   { region: "US",     Entry: 326,  Mid: 80,  Senior: 653,  Executive: 77,   total: 1136 },
+        "Seattle":       { region: "US",     Entry: 252,  Mid: 49,  Senior: 635,  Executive: 181,  total: 1117 },
+        "Philadelphia":  { region: "US",     Entry: 243,  Mid: 45,  Senior: 603,  Executive: 172,  total: 1063 },
+        "Brazil":        { region: "LATAM",  Entry: 463,  Mid: 41,  Senior: 334,  Executive: 153,  total: 991  },
+        "Calgary":       { region: "Canada", Entry: 244,  Mid: 80,  Senior: 316,  Executive: 37,   total: 677  },
+        "Miami":         { region: "US",     Entry: 175,  Mid: 16,  Senior: 263,  Executive: 39,   total: 493  },
+        "Vancouver":     { region: "Canada", Entry: 145,  Mid: 55,  Senior: 209,  Executive: 27,   total: 436  },
+      },
+      directEmployers: [
+        { company: "Gpac", count: 462, levels: ["Entry","Mid","Senior","Executive"] },
+        { company: "NorthPoint Search Group", count: 125, levels: ["Entry","Mid","Senior","Executive"] },
+        { company: "Maximus", count: 64, levels: ["Executive"] },
+        { company: "Cardinal Health", count: 58, levels: ["Executive"] },
+        { company: "The Pivot Group", count: 57, levels: ["Entry","Executive"] },
+        { company: "Highmark Health", count: 27, levels: ["Mid"] },
+        { company: "Baker Tilly Advisory Group", count: 16, levels: ["Mid","Executive"] },
+        { company: "Grant Thornton", count: 9, levels: ["Mid"] },
+        { company: "EY", count: 9, levels: ["Senior"] },
+        { company: "HCA Healthcare", count: 8, levels: ["Senior","Executive"] },
+      ],
+      staffingFirms: [
+        { company: "Robert Half", count: 369, levels: ["Entry","Mid","Senior","Executive"] },
+        { company: "Jobot", count: 326, levels: ["Entry","Mid","Senior","Executive"] },
+        { company: "Aston Carter", count: 27, levels: ["Entry","Mid","Executive"] },
+        { company: "Insight Global", count: 6, levels: ["Entry","Mid","Senior"] },
+        { company: "Beacon Hill", count: 5, levels: ["Entry","Mid"] },
+        { company: "ManpowerGroup", count: 5, levels: ["Entry","Senior"] },
+        { company: "Korn Ferry", count: 4, levels: ["Mid","Executive"] },
+      ],
+    }
+  ];
+
+  // ── STATE ──
+  let state = {
+    snapshotIndex: 0,
+    regionFilter: 'All',
+    activeLevels: new Set(['Entry', 'Mid', 'Senior', 'Executive']),
+  };
+
+  // ── HELPERS ──
+  function fmtNum(n) {
+    return n.toLocaleString('en-US');
+  }
+
+  function getSnapshot() {
+    return SNAPSHOTS[state.snapshotIndex];
+  }
+
+  function computeSummary(snap) {
+    let total = 0, us = 0, canada = 0, latam = 0;
+    for (const [, m] of Object.entries(snap.markets)) {
+      total += m.total;
+      if (m.region === 'US')     us     += m.total;
+      if (m.region === 'Canada') canada += m.total;
+      if (m.region === 'LATAM')  latam  += m.total;
+    }
+    return { total, us, canada, latam };
+  }
+
+  function globalMax(snap) {
+    let max = 0;
+    for (const [, m] of Object.entries(snap.markets)) {
+      if (m.total > max) max = m.total;
+    }
+    return max;
+  }
+
+  function levelClass(level) {
+    return level.toLowerCase().replace('executive', 'exec');
+  }
+
+  // ── RENDER ──
+  function render() {
+    const snap = getSnapshot();
+    const app = document.getElementById('app');
+    app.innerHTML = buildHTML(snap);
+    attachEvents();
+    scaleInfographic();
+  }
+
+  function buildHTML(snap) {
+    const summary = computeSummary(snap);
+    const gmax    = globalMax(snap);
+
+    return `
+      ${buildHeader()}
+      ${buildSelector()}
+      ${buildSummaryCards(summary)}
+      ${buildMarketsSection(snap, gmax)}
+      ${buildWhoHiringSection(snap)}
+      ${buildInfographicSection()}
+      ${buildLinkedInSection(snap)}
+      ${buildMethodologySection()}
+      ${buildFooter()}
+    `;
+  }
+
+  function buildHeader() {
+    return `
+      <div class="header">
+        <div class="logo">S</div>
+        <div class="header-text">
+          <h1>Superinterviews Hiring Trends</h1>
+          <p>Accounting &amp; Finance Market Intelligence</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildSelector() {
+    const options = SNAPSHOTS.map((s, i) =>
+      `<option value="${i}" ${i === state.snapshotIndex ? 'selected' : ''}>${s.label}</option>`
+    ).join('');
+    return `
+      <div class="selector-row">
+        <label for="snap-select">Snapshot</label>
+        <select id="snap-select">${options}</select>
+      </div>
+    `;
+  }
+
+  function buildSummaryCards(summary) {
+    return `
+      <div class="cards-grid">
+        <div class="card total">
+          <div class="card-label">Total Postings</div>
+          <div class="card-value">${fmtNum(summary.total)}</div>
+          <div class="card-sub">All 20 markets</div>
+        </div>
+        <div class="card">
+          <div class="card-label">United States</div>
+          <div class="card-value">${fmtNum(summary.us)}</div>
+          <div class="card-sub">14 US markets</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Canada</div>
+          <div class="card-value">${fmtNum(summary.canada)}</div>
+          <div class="card-sub">3 Canadian markets</div>
+        </div>
+        <div class="card">
+          <div class="card-label">LATAM</div>
+          <div class="card-value">${fmtNum(summary.latam)}</div>
+          <div class="card-sub">2 LATAM markets</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildMarketsSection(snap, gmax) {
+    const regions = ['All', 'US', 'Canada', 'LATAM'];
+    const levels  = ['Entry', 'Mid', 'Senior', 'Executive'];
+
+    const regionBtns = regions.map(r =>
+      `<button class="filter-btn${state.regionFilter === r ? ' active' : ''}" data-region="${r}">${r}</button>`
+    ).join('');
+
+    const levelBtns = levels.map(l =>
+      `<button class="level-btn${state.activeLevels.has(l) ? ' active' : ''}" data-level="${l}">${l}</button>`
+    ).join('');
+
+    // Sort markets: US first, then Canada, then LATAM; within each, by total desc
+    const regionOrder = ['US', 'Canada', 'LATAM'];
+    const filtered = Object.entries(snap.markets)
+      .filter(([, m]) => state.regionFilter === 'All' || m.region === state.regionFilter)
+      .sort((a, b) => {
+        const rA = regionOrder.indexOf(a[1].region);
+        const rB = regionOrder.indexOf(b[1].region);
+        if (rA !== rB) return rA - rB;
+        return b[1].total - a[1].total;
+      });
+
+    const marketCards = filtered.map(([name, m]) => buildMarketCard(name, m, gmax)).join('');
+
+    const legend = ['Entry','Mid','Senior','Executive'].map(l => `
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--${levelClass(l)})"></div>
+        <span>${l}</span>
+      </div>`).join('');
+
+    return `
+      <div class="section">
+        <div class="section-label">Markets</div>
+        <div class="filter-row" id="region-filters">${regionBtns}</div>
+        <div class="filter-row" id="level-filters">${levelBtns}</div>
+        <div class="level-legend">${legend}</div>
+        <div id="market-cards">${marketCards}</div>
+      </div>
+    `;
+  }
+
+  function buildMarketCard(name, m, gmax) {
+    const levels = ['Entry', 'Mid', 'Senior', 'Executive'];
+    const levelKeys = ['Entry', 'Mid', 'Senior', 'Executive'];
+
+    const bars = levelKeys
+      .filter(l => state.activeLevels.has(l))
+      .map(l => {
+        const pct = gmax > 0 ? (m[l] / gmax) * 100 : 0;
+        return `
+          <div class="bar-row">
+            <span class="bar-label">${l}</span>
+            <div class="bar-track"><div class="bar-fill ${levelClass(l)}" style="width:${pct.toFixed(1)}%"></div></div>
+            <span class="bar-count">${fmtNum(m[l])}</span>
+          </div>`;
+      }).join('');
+
+    const totalPct = gmax > 0 ? (m.total / gmax) * 100 : 0;
+    const totalBar = `
+      <div class="bar-row">
+        <span class="bar-label" style="color:var(--text);font-weight:600">Total</span>
+        <div class="bar-track"><div class="bar-fill total" style="width:${totalPct.toFixed(1)}%"></div></div>
+        <span class="bar-count" style="color:var(--text);font-weight:600">${fmtNum(m.total)}</span>
+      </div>`;
+
+    return `
+      <div class="market-card">
+        <div class="market-header">
+          <span class="market-name">${name}</span>
+          <div class="market-right">
+            <span class="region-pill ${m.region}">${m.region}</span>
+          </div>
+        </div>
+        ${bars}
+        ${totalBar}
+      </div>`;
+  }
+
+  function buildWhoHiringSection(snap) {
+    const employerItems = snap.directEmployers.map((e, i) => buildCompanyItem(e, i + 1)).join('');
+    const firmItems     = snap.staffingFirms.map((e, i)  => buildCompanyItem(e, i + 1)).join('');
+
+    return `
+      <div class="section">
+        <div class="section-label">Who's Hiring</div>
+        <div class="subsection-label">Top Direct Employers</div>
+        <div class="company-list">${employerItems}</div>
+        <div class="subsection-label">Top Staffing Firms</div>
+        <div class="company-list">${firmItems}</div>
+      </div>
+    `;
+  }
+
+  function buildCompanyItem(e, rank) {
+    const allLevels = ['Entry', 'Mid', 'Senior', 'Executive'];
+    const dots = allLevels.map(l => {
+      const active = e.levels.includes(l);
+      return active
+        ? `<div class="dot ${levelClass(l)}" title="${l}"></div>`
+        : `<div class="dot" style="background:var(--border)" title="${l}"></div>`;
+    }).join('');
+
+    return `
+      <div class="company-item">
+        <span class="company-rank">${rank}</span>
+        <span class="company-name">${e.company}</span>
+        <div class="company-dots">${dots}</div>
+        <span class="company-count">${fmtNum(e.count)}</span>
+      </div>`;
+  }
+
+  function buildInfographicSection() {
+    return `
+      <div class="section">
+        <div class="section-label">Infographic</div>
+        <div class="infographic-wrapper">
+          <iframe id="infographic-frame" src="/replicant/infographic.html" scrolling="no"></iframe>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildLinkedInSection(snap) {
+    // Escape the post text for use in a data attribute
+    const escaped = snap.linkedinPost.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return `
+      <div class="section">
+        <div class="section-label">LinkedIn Post</div>
+        <div class="post-box">
+          <div class="post-text">${escaped}</div>
+          <button class="copy-btn" id="copy-post-btn">Copy</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildMethodologySection() {
+    return `
+      <div class="section">
+        <details>
+          <summary>Methodology</summary>
+          <div class="method-body">
+            <h4>Source</h4>
+            <p><strong>Adzuna API</strong> — job posting aggregator covering major job boards across the US, Canada, and LATAM markets.</p>
+
+            <h4>What We Track</h4>
+            <p>Title-based search for accounting, bookkeeping, audit, and tax roles. We intentionally exclude banking, trading, and FP&amp;A roles to keep the dataset focused on accounting &amp; finance operations.</p>
+
+            <h4>Role Titles by Level</h4>
+            <ul>
+              <li><strong>Entry:</strong> staff accountant, junior accountant, bookkeeper, accounts payable, accounts receivable</li>
+              <li><strong>Mid:</strong> senior accountant, tax accountant, audit associate, payroll specialist</li>
+              <li><strong>Senior:</strong> financial controller, accounting controller, accounting manager, audit manager, tax manager</li>
+              <li><strong>Executive:</strong> CFO, chief financial officer, VP finance, director of accounting</li>
+            </ul>
+
+            <h4>Markets</h4>
+            <p>20 markets across 3 regions: 14 US cities, 3 Canadian cities (Toronto, Calgary, Vancouver), and 2 LATAM markets (Mexico, Brazil).</p>
+
+            <h4>Limitations</h4>
+            <ul>
+              <li>Point-in-time snapshot — reflects postings active on the collection date</li>
+              <li>May include duplicate postings across job boards</li>
+              <li>Title-based matching misses non-standard or creative job titles</li>
+              <li>Month-over-month comparisons are only valid between snapshots collected approximately 30 days apart</li>
+            </ul>
+
+            <h4>Cadence</h4>
+            <p>Collected mid-month. March 2026 is the baseline. The first real month-over-month comparison will be April 2026.</p>
+          </div>
+        </details>
+      </div>
+    `;
+  }
+
+  function buildFooter() {
+    return `
+      <div class="footer">
+        Source: Adzuna API &mdash; <a href="https://superinterviews.com" target="_blank">superinterviews.com</a>
+      </div>
+    `;
+  }
+
+  // ── EVENTS ──
+  function attachEvents() {
+    // Snapshot selector
+    const sel = document.getElementById('snap-select');
+    if (sel) {
+      sel.addEventListener('change', e => {
+        state.snapshotIndex = parseInt(e.target.value, 10);
+        render();
+      });
+    }
+
+    // Region filter buttons
+    document.querySelectorAll('[data-region]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        state.regionFilter = e.currentTarget.dataset.region;
+        render();
+      });
+    });
+
+    // Level toggle buttons
+    document.querySelectorAll('[data-level]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const level = e.currentTarget.dataset.level;
+        if (state.activeLevels.has(level)) {
+          // Don't allow deselecting all levels
+          if (state.activeLevels.size > 1) state.activeLevels.delete(level);
+        } else {
+          state.activeLevels.add(level);
+        }
+        render();
+      });
+    });
+
+    // Copy post button
+    const copyBtn = document.getElementById('copy-post-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const snap = getSnapshot();
+        navigator.clipboard.writeText(snap.linkedinPost).then(() => {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+        }).catch(() => {
+          // Fallback for non-https
+          const ta = document.createElement('textarea');
+          ta.value = snap.linkedinPost;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+        });
+      });
+    }
+  }
+
+  // ── INFOGRAPHIC SCALING ──
+  function scaleInfographic() {
+    const frame   = document.getElementById('infographic-frame');
+    const wrapper = frame && frame.parentElement;
+    if (!frame || !wrapper) return;
+
+    const containerWidth = wrapper.clientWidth;
+    const nativeWidth    = 1080;
+    const scale          = containerWidth / nativeWidth;
+
+    frame.style.width  = nativeWidth + 'px';
+    frame.style.transform = `scale(${scale})`;
+    frame.style.transformOrigin = 'top left';
+
+    // We need to know the iframe's native height to set wrapper height correctly.
+    // Use a fixed aspect ratio as fallback; update once iframe loads.
+    const nativeHeight = 1080; // square-ish default; will be corrected on load
+    wrapper.style.height = (nativeHeight * scale) + 'px';
+
+    frame.onload = () => {
+      try {
+        const iDoc = frame.contentDocument || frame.contentWindow.document;
+        const h = iDoc.documentElement.scrollHeight || iDoc.body.scrollHeight;
+        if (h && h > 0) {
+          frame.style.height = h + 'px';
+          wrapper.style.height = (h * scale) + 'px';
+        }
+      } catch(e) {
+        // cross-origin — keep default height
+      }
+    };
+  }
+
+  // ── INIT ──
+  document.addEventListener('DOMContentLoaded', () => {
+    render();
+  });
+</script>
+</body>
+</html>

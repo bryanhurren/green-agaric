@@ -1,0 +1,1172 @@
+{
+  "date": "2026-03-17",
+  "source": "Adzuna API",
+  "methodology": "Point-in-time snapshot of active job postings (last 30 days). Counts are based on title-specific searches for accounting, bookkeeping, audit, and tax roles across 4 seniority levels. Excludes broader finance roles (banking, trading, FP&A). Company data sampled from top 250 results per title (US national).",
+  "levels_searched": {
+    "Entry": [
+      "staff accountant",
+      "junior accountant",
+      "bookkeeper",
+      "accounts payable",
+      "accounts receivable"
+    ],
+    "Mid": [
+      "senior accountant",
+      "tax accountant",
+      "audit associate",
+      "payroll specialist"
+    ],
+    "Senior": [
+      "financial controller",
+      "accounting controller",
+      "accounting manager",
+      "audit manager",
+      "tax manager"
+    ],
+    "Executive": [
+      "CFO",
+      "chief financial officer",
+      "VP finance",
+      "director of accounting"
+    ]
+  },
+  "markets": {
+    "Mexico": {
+      "region": "LATAM",
+      "levels": {
+        "Entry": {
+          "total": 588,
+          "titles": {
+            "staff accountant": 22,
+            "junior accountant": 11,
+            "bookkeeper": 11,
+            "accounts payable": 251,
+            "accounts receivable": 293
+          }
+        },
+        "Mid": {
+          "total": 105,
+          "titles": {
+            "senior accountant": 49,
+            "tax accountant": 20,
+            "audit associate": 5,
+            "payroll specialist": 31
+          }
+        },
+        "Senior": {
+          "total": 385,
+          "titles": {
+            "accounting manager": 137,
+            "audit manager": 78,
+            "tax manager": 101,
+            "financial controller": 69
+          }
+        },
+        "Executive": {
+          "total": 151,
+          "titles": {
+            "CFO": 102,
+            "chief financial officer": 10,
+            "VP finance": 26,
+            "director of accounting": 13
+          }
+        }
+      },
+      "total": 1229
+    },
+    "Philadelphia": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 243,
+          "titles": {
+            "staff accountant": 14,
+            "junior accountant": 1,
+            "bookkeeper": 36,
+            "accounts payable": 88,
+            "accounts receivable": 104
+          }
+        },
+        "Mid": {
+          "total": 45,
+          "titles": {
+            "senior accountant": 23,
+            "tax accountant": 11,
+            "audit associate": 8,
+            "payroll specialist": 3
+          }
+        },
+        "Senior": {
+          "total": 603,
+          "titles": {
+            "accounting manager": 150,
+            "audit manager": 126,
+            "tax manager": 85,
+            "financial controller": 242
+          }
+        },
+        "Executive": {
+          "total": 172,
+          "titles": {
+            "CFO": 52,
+            "chief financial officer": 112,
+            "VP finance": 3,
+            "director of accounting": 5
+          }
+        }
+      },
+      "total": 1063
+    },
+    "Charlotte": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 239,
+          "titles": {
+            "staff accountant": 7,
+            "junior accountant": 0,
+            "bookkeeper": 32,
+            "accounts payable": 94,
+            "accounts receivable": 106
+          }
+        },
+        "Mid": {
+          "total": 70,
+          "titles": {
+            "senior accountant": 27,
+            "tax accountant": 19,
+            "audit associate": 15,
+            "payroll specialist": 9
+          }
+        },
+        "Senior": {
+          "total": 824,
+          "titles": {
+            "accounting manager": 209,
+            "audit manager": 257,
+            "tax manager": 138,
+            "financial controller": 220
+          }
+        },
+        "Executive": {
+          "total": 85,
+          "titles": {
+            "CFO": 48,
+            "chief financial officer": 12,
+            "VP finance": 10,
+            "director of accounting": 15
+          }
+        }
+      },
+      "total": 1218
+    },
+    "Dallas": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 662,
+          "titles": {
+            "staff accountant": 45,
+            "junior accountant": 2,
+            "bookkeeper": 79,
+            "accounts payable": 252,
+            "accounts receivable": 284
+          }
+        },
+        "Mid": {
+          "total": 159,
+          "titles": {
+            "senior accountant": 93,
+            "tax accountant": 11,
+            "audit associate": 29,
+            "payroll specialist": 26
+          }
+        },
+        "Senior": {
+          "total": 1256,
+          "titles": {
+            "accounting manager": 354,
+            "audit manager": 276,
+            "tax manager": 158,
+            "financial controller": 468
+          }
+        },
+        "Executive": {
+          "total": 252,
+          "titles": {
+            "CFO": 100,
+            "chief financial officer": 118,
+            "VP finance": 10,
+            "director of accounting": 24
+          }
+        }
+      },
+      "total": 2329
+    },
+    "Atlanta": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 526,
+          "titles": {
+            "staff accountant": 36,
+            "junior accountant": 0,
+            "bookkeeper": 81,
+            "accounts payable": 177,
+            "accounts receivable": 232
+          }
+        },
+        "Mid": {
+          "total": 191,
+          "titles": {
+            "senior accountant": 81,
+            "tax accountant": 20,
+            "audit associate": 42,
+            "payroll specialist": 48
+          }
+        },
+        "Senior": {
+          "total": 1228,
+          "titles": {
+            "accounting manager": 339,
+            "audit manager": 300,
+            "tax manager": 159,
+            "financial controller": 430
+          }
+        },
+        "Executive": {
+          "total": 260,
+          "titles": {
+            "CFO": 98,
+            "chief financial officer": 123,
+            "VP finance": 12,
+            "director of accounting": 27
+          }
+        }
+      },
+      "total": 2205
+    },
+    "Boston": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 342,
+          "titles": {
+            "staff accountant": 17,
+            "junior accountant": 1,
+            "bookkeeper": 56,
+            "accounts payable": 128,
+            "accounts receivable": 140
+          }
+        },
+        "Mid": {
+          "total": 65,
+          "titles": {
+            "senior accountant": 28,
+            "tax accountant": 6,
+            "audit associate": 13,
+            "payroll specialist": 18
+          }
+        },
+        "Senior": {
+          "total": 1003,
+          "titles": {
+            "accounting manager": 275,
+            "audit manager": 294,
+            "tax manager": 106,
+            "financial controller": 328
+          }
+        },
+        "Executive": {
+          "total": 246,
+          "titles": {
+            "CFO": 83,
+            "chief financial officer": 123,
+            "VP finance": 19,
+            "director of accounting": 21
+          }
+        }
+      },
+      "total": 1656
+    },
+    "Vancouver": {
+      "region": "Canada",
+      "levels": {
+        "Entry": {
+          "total": 145,
+          "titles": {
+            "staff accountant": 7,
+            "junior accountant": 14,
+            "bookkeeper": 26,
+            "accounts payable": 48,
+            "accounts receivable": 50
+          }
+        },
+        "Mid": {
+          "total": 55,
+          "titles": {
+            "senior accountant": 23,
+            "tax accountant": 24,
+            "audit associate": 2,
+            "payroll specialist": 6
+          }
+        },
+        "Senior": {
+          "total": 209,
+          "titles": {
+            "accounting manager": 70,
+            "audit manager": 40,
+            "tax manager": 19,
+            "financial controller": 80
+          }
+        },
+        "Executive": {
+          "total": 27,
+          "titles": {
+            "CFO": 9,
+            "chief financial officer": 8,
+            "VP finance": 2,
+            "director of accounting": 8
+          }
+        }
+      },
+      "total": 436
+    },
+    "Chicago": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 467,
+          "titles": {
+            "staff accountant": 41,
+            "junior accountant": 1,
+            "bookkeeper": 84,
+            "accounts payable": 151,
+            "accounts receivable": 190
+          }
+        },
+        "Mid": {
+          "total": 104,
+          "titles": {
+            "senior accountant": 65,
+            "tax accountant": 8,
+            "audit associate": 25,
+            "payroll specialist": 6
+          }
+        },
+        "Senior": {
+          "total": 1080,
+          "titles": {
+            "accounting manager": 332,
+            "audit manager": 275,
+            "tax manager": 166,
+            "financial controller": 307
+          }
+        },
+        "Executive": {
+          "total": 197,
+          "titles": {
+            "CFO": 127,
+            "chief financial officer": 25,
+            "VP finance": 11,
+            "director of accounting": 34
+          }
+        }
+      },
+      "total": 1848
+    },
+    "Minneapolis": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 326,
+          "titles": {
+            "staff accountant": 11,
+            "junior accountant": 0,
+            "bookkeeper": 54,
+            "accounts payable": 115,
+            "accounts receivable": 146
+          }
+        },
+        "Mid": {
+          "total": 80,
+          "titles": {
+            "senior accountant": 31,
+            "tax accountant": 7,
+            "audit associate": 17,
+            "payroll specialist": 25
+          }
+        },
+        "Senior": {
+          "total": 653,
+          "titles": {
+            "accounting manager": 181,
+            "audit manager": 191,
+            "tax manager": 74,
+            "financial controller": 207
+          }
+        },
+        "Executive": {
+          "total": 77,
+          "titles": {
+            "CFO": 47,
+            "chief financial officer": 13,
+            "VP finance": 4,
+            "director of accounting": 13
+          }
+        }
+      },
+      "total": 1136
+    },
+    "San Francisco": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 253,
+          "titles": {
+            "staff accountant": 13,
+            "junior accountant": 0,
+            "bookkeeper": 42,
+            "accounts payable": 93,
+            "accounts receivable": 105
+          }
+        },
+        "Mid": {
+          "total": 51,
+          "titles": {
+            "senior accountant": 34,
+            "tax accountant": 2,
+            "audit associate": 9,
+            "payroll specialist": 6
+          }
+        },
+        "Senior": {
+          "total": 731,
+          "titles": {
+            "accounting manager": 212,
+            "audit manager": 138,
+            "tax manager": 126,
+            "financial controller": 255
+          }
+        },
+        "Executive": {
+          "total": 239,
+          "titles": {
+            "CFO": 77,
+            "chief financial officer": 121,
+            "VP finance": 19,
+            "director of accounting": 22
+          }
+        }
+      },
+      "total": 1274
+    },
+    "Calgary": {
+      "region": "Canada",
+      "levels": {
+        "Entry": {
+          "total": 244,
+          "titles": {
+            "staff accountant": 16,
+            "junior accountant": 9,
+            "bookkeeper": 25,
+            "accounts payable": 87,
+            "accounts receivable": 107
+          }
+        },
+        "Mid": {
+          "total": 80,
+          "titles": {
+            "senior accountant": 29,
+            "tax accountant": 36,
+            "audit associate": 4,
+            "payroll specialist": 11
+          }
+        },
+        "Senior": {
+          "total": 316,
+          "titles": {
+            "accounting manager": 113,
+            "audit manager": 64,
+            "tax manager": 30,
+            "financial controller": 109
+          }
+        },
+        "Executive": {
+          "total": 37,
+          "titles": {
+            "CFO": 20,
+            "chief financial officer": 3,
+            "VP finance": 7,
+            "director of accounting": 7
+          }
+        }
+      },
+      "total": 677
+    },
+    "Miami": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 175,
+          "titles": {
+            "staff accountant": 10,
+            "junior accountant": 2,
+            "bookkeeper": 29,
+            "accounts payable": 66,
+            "accounts receivable": 68
+          }
+        },
+        "Mid": {
+          "total": 16,
+          "titles": {
+            "senior accountant": 10,
+            "tax accountant": 1,
+            "audit associate": 1,
+            "payroll specialist": 4
+          }
+        },
+        "Senior": {
+          "total": 263,
+          "titles": {
+            "accounting manager": 81,
+            "audit manager": 44,
+            "tax manager": 40,
+            "financial controller": 98
+          }
+        },
+        "Executive": {
+          "total": 39,
+          "titles": {
+            "CFO": 14,
+            "chief financial officer": 9,
+            "VP finance": 3,
+            "director of accounting": 13
+          }
+        }
+      },
+      "total": 493
+    },
+    "New York": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 886,
+          "titles": {
+            "staff accountant": 56,
+            "junior accountant": 7,
+            "bookkeeper": 177,
+            "accounts payable": 313,
+            "accounts receivable": 333
+          }
+        },
+        "Mid": {
+          "total": 133,
+          "titles": {
+            "senior accountant": 68,
+            "tax accountant": 5,
+            "audit associate": 30,
+            "payroll specialist": 30
+          }
+        },
+        "Senior": {
+          "total": 2111,
+          "titles": {
+            "accounting manager": 522,
+            "audit manager": 550,
+            "tax manager": 257,
+            "financial controller": 782
+          }
+        },
+        "Executive": {
+          "total": 533,
+          "titles": {
+            "CFO": 264,
+            "chief financial officer": 170,
+            "VP finance": 49,
+            "director of accounting": 50
+          }
+        }
+      },
+      "total": 3663
+    },
+    "Denver": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 418,
+          "titles": {
+            "staff accountant": 32,
+            "junior accountant": 2,
+            "bookkeeper": 81,
+            "accounts payable": 131,
+            "accounts receivable": 172
+          }
+        },
+        "Mid": {
+          "total": 88,
+          "titles": {
+            "senior accountant": 41,
+            "tax accountant": 7,
+            "audit associate": 24,
+            "payroll specialist": 16
+          }
+        },
+        "Senior": {
+          "total": 890,
+          "titles": {
+            "accounting manager": 241,
+            "audit manager": 211,
+            "tax manager": 119,
+            "financial controller": 319
+          }
+        },
+        "Executive": {
+          "total": 218,
+          "titles": {
+            "CFO": 56,
+            "chief financial officer": 120,
+            "VP finance": 12,
+            "director of accounting": 30
+          }
+        }
+      },
+      "total": 1614
+    },
+    "Toronto": {
+      "region": "Canada",
+      "levels": {
+        "Entry": {
+          "total": 438,
+          "titles": {
+            "staff accountant": 23,
+            "junior accountant": 11,
+            "bookkeeper": 55,
+            "accounts payable": 158,
+            "accounts receivable": 191
+          }
+        },
+        "Mid": {
+          "total": 199,
+          "titles": {
+            "senior accountant": 73,
+            "tax accountant": 101,
+            "audit associate": 9,
+            "payroll specialist": 16
+          }
+        },
+        "Senior": {
+          "total": 959,
+          "titles": {
+            "accounting manager": 245,
+            "audit manager": 293,
+            "tax manager": 90,
+            "financial controller": 331
+          }
+        },
+        "Executive": {
+          "total": 151,
+          "titles": {
+            "CFO": 89,
+            "chief financial officer": 16,
+            "VP finance": 28,
+            "director of accounting": 18
+          }
+        }
+      },
+      "total": 1747
+    },
+    "Houston": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 523,
+          "titles": {
+            "staff accountant": 33,
+            "junior accountant": 1,
+            "bookkeeper": 92,
+            "accounts payable": 170,
+            "accounts receivable": 227
+          }
+        },
+        "Mid": {
+          "total": 93,
+          "titles": {
+            "senior accountant": 47,
+            "tax accountant": 6,
+            "audit associate": 23,
+            "payroll specialist": 17
+          }
+        },
+        "Senior": {
+          "total": 959,
+          "titles": {
+            "accounting manager": 280,
+            "audit manager": 267,
+            "tax manager": 138,
+            "financial controller": 274
+          }
+        },
+        "Executive": {
+          "total": 140,
+          "titles": {
+            "CFO": 90,
+            "chief financial officer": 20,
+            "VP finance": 7,
+            "director of accounting": 23
+          }
+        }
+      },
+      "total": 1715
+    },
+    "Seattle": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 252,
+          "titles": {
+            "staff accountant": 11,
+            "junior accountant": 0,
+            "bookkeeper": 52,
+            "accounts payable": 93,
+            "accounts receivable": 96
+          }
+        },
+        "Mid": {
+          "total": 49,
+          "titles": {
+            "senior accountant": 21,
+            "tax accountant": 3,
+            "audit associate": 5,
+            "payroll specialist": 20
+          }
+        },
+        "Senior": {
+          "total": 635,
+          "titles": {
+            "accounting manager": 167,
+            "audit manager": 124,
+            "tax manager": 94,
+            "financial controller": 250
+          }
+        },
+        "Executive": {
+          "total": 181,
+          "titles": {
+            "CFO": 48,
+            "chief financial officer": 116,
+            "VP finance": 3,
+            "director of accounting": 14
+          }
+        }
+      },
+      "total": 1117
+    },
+    "Los Angeles": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 491,
+          "titles": {
+            "staff accountant": 25,
+            "junior accountant": 6,
+            "bookkeeper": 72,
+            "accounts payable": 198,
+            "accounts receivable": 190
+          }
+        },
+        "Mid": {
+          "total": 84,
+          "titles": {
+            "senior accountant": 45,
+            "tax accountant": 6,
+            "audit associate": 11,
+            "payroll specialist": 22
+          }
+        },
+        "Senior": {
+          "total": 977,
+          "titles": {
+            "accounting manager": 332,
+            "audit manager": 190,
+            "tax manager": 121,
+            "financial controller": 334
+          }
+        },
+        "Executive": {
+          "total": 269,
+          "titles": {
+            "CFO": 102,
+            "chief financial officer": 132,
+            "VP finance": 17,
+            "director of accounting": 18
+          }
+        }
+      },
+      "total": 1821
+    },
+    "Brazil": {
+      "region": "LATAM",
+      "levels": {
+        "Entry": {
+          "total": 463,
+          "titles": {
+            "staff accountant": 41,
+            "junior accountant": 6,
+            "bookkeeper": 11,
+            "accounts payable": 204,
+            "accounts receivable": 201
+          }
+        },
+        "Mid": {
+          "total": 41,
+          "titles": {
+            "senior accountant": 16,
+            "tax accountant": 7,
+            "audit associate": 11,
+            "payroll specialist": 7
+          }
+        },
+        "Senior": {
+          "total": 334,
+          "titles": {
+            "accounting manager": 139,
+            "audit manager": 22,
+            "tax manager": 117,
+            "financial controller": 56
+          }
+        },
+        "Executive": {
+          "total": 153,
+          "titles": {
+            "CFO": 132,
+            "chief financial officer": 13,
+            "VP finance": 8,
+            "director of accounting": 0
+          }
+        }
+      },
+      "total": 991
+    },
+    "Phoenix": {
+      "region": "US",
+      "levels": {
+        "Entry": {
+          "total": 377,
+          "titles": {
+            "staff accountant": 21,
+            "junior accountant": 0,
+            "bookkeeper": 89,
+            "accounts payable": 121,
+            "accounts receivable": 146
+          }
+        },
+        "Mid": {
+          "total": 67,
+          "titles": {
+            "senior accountant": 37,
+            "tax accountant": 4,
+            "audit associate": 10,
+            "payroll specialist": 16
+          }
+        },
+        "Senior": {
+          "total": 746,
+          "titles": {
+            "accounting manager": 208,
+            "audit manager": 177,
+            "tax manager": 64,
+            "financial controller": 297
+          }
+        },
+        "Executive": {
+          "total": 294,
+          "titles": {
+            "CFO": 148,
+            "chief financial officer": 128,
+            "VP finance": 8,
+            "director of accounting": 10
+          }
+        }
+      },
+      "total": 1484
+    }
+  },
+  "companies": {
+    "direct_employers": [
+      {
+        "company": "Gpac",
+        "count": 462,
+        "levels": {
+          "Entry": 11,
+          "Mid": 71,
+          "Senior": 366,
+          "Executive": 14
+        }
+      },
+      {
+        "company": "NorthPoint Search Group",
+        "count": 125,
+        "levels": {
+          "Entry": 11,
+          "Mid": 80,
+          "Senior": 29,
+          "Executive": 5
+        }
+      },
+      {
+        "company": "Eastside Rehabilitation Hospital",
+        "count": 68,
+        "levels": {
+          "Senior": 68
+        }
+      },
+      {
+        "company": "Maximus",
+        "count": 64,
+        "levels": {
+          "Executive": 64
+        }
+      },
+      {
+        "company": "*US AMR-Jones Lang LaSalle Americas, Inc.",
+        "count": 60,
+        "levels": {
+          "Senior": 60
+        }
+      },
+      {
+        "company": "Cardinal Health",
+        "count": 58,
+        "levels": {
+          "Executive": 58
+        }
+      },
+      {
+        "company": "The Pivot Group",
+        "count": 57,
+        "levels": {
+          "Entry": 35,
+          "Executive": 22
+        }
+      },
+      {
+        "company": "Encompass Health Rehabilitation Hospital of Alexandria",
+        "count": 38,
+        "levels": {
+          "Senior": 38
+        }
+      },
+      {
+        "company": "Encompass Health Rehabilitation Hospital of Columbia",
+        "count": 29,
+        "levels": {
+          "Senior": 29
+        }
+      },
+      {
+        "company": "Highmark Health",
+        "count": 27,
+        "levels": {
+          "Mid": 27
+        }
+      },
+      {
+        "company": "Good Samaritan",
+        "count": 20,
+        "levels": {
+          "Senior": 20
+        }
+      },
+      {
+        "company": "MBE CPAs",
+        "count": 17,
+        "levels": {
+          "Entry": 8,
+          "Mid": 4,
+          "Senior": 5
+        }
+      },
+      {
+        "company": "Baker Tilly Advisory Group, LP",
+        "count": 16,
+        "levels": {
+          "Mid": 12,
+          "Executive": 4
+        }
+      },
+      {
+        "company": "AnMed Health Rehabilitation Hospital",
+        "count": 16,
+        "levels": {
+          "Senior": 16
+        }
+      },
+      {
+        "company": "Defense Holdings, Inc.",
+        "count": 12,
+        "levels": {
+          "Entry": 12
+        }
+      },
+      {
+        "company": "Talented Search Group",
+        "count": 12,
+        "levels": {
+          "Entry": 3,
+          "Mid": 7,
+          "Senior": 2
+        }
+      },
+      {
+        "company": "Forvis Mazars",
+        "count": 10,
+        "levels": {
+          "Mid": 10
+        }
+      },
+      {
+        "company": "Grant Thornton",
+        "count": 9,
+        "levels": {
+          "Mid": 9
+        }
+      },
+      {
+        "company": "Kelly Services",
+        "count": 9,
+        "levels": {
+          "Entry": 4,
+          "Mid": 3,
+          "Senior": 1,
+          "Executive": 1
+        }
+      },
+      {
+        "company": "StaffingForce",
+        "count": 9,
+        "levels": {
+          "Entry": 2,
+          "Mid": 3,
+          "Senior": 3,
+          "Executive": 1
+        }
+      },
+      {
+        "company": "EY",
+        "count": 9,
+        "levels": {
+          "Senior": 9
+        }
+      },
+      {
+        "company": "Cedar Point",
+        "count": 8,
+        "levels": {
+          "Entry": 8
+        }
+      },
+      {
+        "company": "HCA Healthcare",
+        "count": 8,
+        "levels": {
+          "Senior": 1,
+          "Executive": 7
+        }
+      },
+      {
+        "company": "Payroll Solutions",
+        "count": 7,
+        "levels": {
+          "Mid": 7
+        }
+      },
+      {
+        "company": "Kearney & Company",
+        "count": 7,
+        "levels": {
+          "Mid": 5,
+          "Senior": 2
+        }
+      }
+    ],
+    "staffing_firms": [
+      {
+        "company": "Robert Half",
+        "count": 369,
+        "levels": {
+          "Entry": 191,
+          "Mid": 95,
+          "Senior": 28,
+          "Executive": 55
+        }
+      },
+      {
+        "company": "Jobot",
+        "count": 326,
+        "levels": {
+          "Entry": 58,
+          "Mid": 130,
+          "Senior": 103,
+          "Executive": 35
+        }
+      },
+      {
+        "company": "Aston Carter",
+        "count": 27,
+        "levels": {
+          "Entry": 19,
+          "Mid": 6,
+          "Executive": 2
+        }
+      },
+      {
+        "company": "Insight Global",
+        "count": 6,
+        "levels": {
+          "Entry": 1,
+          "Mid": 3,
+          "Senior": 2
+        }
+      },
+      {
+        "company": "Beacon Hill",
+        "count": 5,
+        "levels": {
+          "Entry": 4,
+          "Mid": 1
+        }
+      },
+      {
+        "company": "ManpowerGroup",
+        "count": 5,
+        "levels": {
+          "Entry": 4,
+          "Senior": 1
+        }
+      },
+      {
+        "company": "Korn Ferry",
+        "count": 4,
+        "levels": {
+          "Mid": 1,
+          "Executive": 3
+        }
+      },
+      {
+        "company": "Creative Financial Staffing",
+        "count": 1,
+        "levels": {
+          "Entry": 1
+        }
+      },
+      {
+        "company": "Vaco",
+        "count": 1,
+        "levels": {
+          "Mid": 1
+        }
+      }
+    ]
+  }
+}
