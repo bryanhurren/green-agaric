@@ -81,11 +81,13 @@
     /* ── SECTION LABELS ── */
     .section-label {
       font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
     }
 
     .section {
@@ -178,15 +180,22 @@
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .filter-row-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
     }
 
     .filter-btn {
-      padding: 5px 10px;
+      padding: 6px 14px;
       border-radius: 20px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
+      border: 1px solid #30363D;
+      background: var(--surface);
+      color: var(--text);
       font-family: inherit;
       font-size: 12px;
       font-weight: 500;
@@ -195,21 +204,22 @@
     }
 
     .filter-btn:hover {
-      border-color: var(--text);
-      color: var(--text);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     .filter-btn.active {
       background: var(--accent);
       border-color: var(--accent);
       color: #0D1117;
+      font-weight: 700;
     }
 
     .level-btn {
-      padding: 5px 10px;
+      padding: 6px 14px;
       border-radius: 20px;
-      border: 1px solid var(--border);
-      background: transparent;
+      border: 1px solid #30363D;
+      background: var(--surface);
       font-family: inherit;
       font-size: 12px;
       font-weight: 500;
@@ -785,7 +795,9 @@ superinterviews.com
     return `
       <div class="section">
         <div class="section-label">Markets</div>
+        <div class="filter-row-label">Filter by region</div>
         <div class="filter-row" id="region-filters">${regionBtns}</div>
+        <div class="filter-row-label">Filter by level</div>
         <div class="filter-row" id="level-filters">${levelBtns}</div>
         <div class="level-legend">${legend}</div>
         <div id="market-cards">${marketCards}</div>
