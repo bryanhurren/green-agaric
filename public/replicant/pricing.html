@@ -681,11 +681,14 @@ function update() {
   const subRecruitPH = subAnnual.recruit / T;
   const odRecruitPH  = odPerHire.recruit / T;
   const breakEvenN   = (subAnnual.pfeeTotal - odPerHire.pfeeTotal) / (odRecruitPH - subRecruitPH);
+  const beN = Math.ceil(breakEvenN);
   const breakEvenMsg = breakEvenN <= 0
     ? `Subscription · Annual Commit is cheaper at any volume with this configuration.`
     : breakEvenN > 200
     ? `On-Demand is cheaper at any realistic volume with this configuration.`
-    : `Subscription · Annual Commit becomes cheaper than On-Demand at ${Math.ceil(breakEvenN)} hire${Math.ceil(breakEvenN) !== 1 ? 's' : ''}/year. Above that, every hire saves ${fmtF(odRecruitPH - subRecruitPH)}.`;
+    : T < beN
+    ? `At ${T} hire${T !== 1 ? 's' : ''}/year, On-Demand is currently cheaper. Subscription · Annual Commit becomes the better deal at ${beN}+ hires/year — each additional hire above that saves ${fmtF(odRecruitPH - subRecruitPH)}.`
+    : `At ${T} hire${T !== 1 ? 's' : ''}/year, Subscription · Annual Commit is the better deal (break-even was ${beN} hire${beN !== 1 ? 's' : ''}). Every hire saves ${fmtF(odRecruitPH - subRecruitPH)} vs On-Demand.`;
 
   document.getElementById('scenarioTbl').innerHTML =
     `<thead><tr>
