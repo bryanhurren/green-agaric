@@ -239,6 +239,18 @@
       background: color-mix(in srgb, var(--lc) 12%, transparent);
     }
 
+    /* ── REGION HEADER ── */
+    .region-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 16px 0 8px;
+    }
+
+    .region-header:first-child { margin-top: 0; }
+
     /* ── MARKET CARDS ── */
     .market-card {
       background: var(--surface);
@@ -784,7 +796,16 @@ superinterviews.com
         return b[1].total - a[1].total;
       });
 
-    const marketCards = filtered.map(([name, m]) => buildMarketCard(name, m, gmax)).join('');
+    // Group markets by region with headers
+    let currentRegion = null;
+    const marketCards = filtered.map(([name, m]) => {
+      let header = '';
+      if (m.region !== currentRegion) {
+        currentRegion = m.region;
+        header = `<div class="region-header">${m.region}</div>`;
+      }
+      return header + buildMarketCard(name, m, gmax);
+    }).join('');
 
     const legend = ['Entry','Mid','Senior','Executive'].map(l => `
       <div class="legend-item">
