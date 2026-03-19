@@ -384,8 +384,15 @@
   <div style="display:flex;flex-direction:column;gap:16px;">
 
     <div class="result-card">
-      <h2>Commitment Scenarios — Side by Side</h2>
-      <table class="stbl" id="scenarioTbl"></table>
+      <h2>Screen Only — Commitment Scenarios</h2>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">All roles screened. No sourcing. Platform + screen fees only.</div>
+      <table class="stbl" id="screenOnlyTbl"></table>
+    </div>
+
+    <div class="result-card">
+      <h2>With Sourcing — Commitment Scenarios</h2>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;" id="sourcingSubtitle"></div>
+      <table class="stbl" id="mixedTbl"></table>
       <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);" id="qualCandidateNote"></div>
     </div>
 
@@ -448,21 +455,20 @@ function cph({ mode, salaryK, gm, rm, cm, vm }) {
 }
 
 // ── Total fee for a given commit multiplier, vol mult, and platform months ─
-// platformMonths: 0 = no platform, 12 = full year, 3 = on-demand 3 months, etc.
-// platformDiscountMult: 1.0 = full price, (1-annualDiscount/100) = discounted
-function calcTotal(cm, vm, platformMonths, platformDiscountMult) {
+// screenOnly: if true, forces all jobs through screen mode (ignores src %)
+function calcTotal(cm, vm, platformMonths, platformDiscountMult, screenOnly) {
   const T = S.totalJobs;
   const gm = G_MULT[S.guarantee];
   const rm = R_MULT[S.rush];
 
-  let recruit = 0;
-  const lines = [];
+  let screenFees = 0;
+  let sourceFees = 0;
 
   ['hs', 'ls'].forEach(seg => {
     const cfg = S[seg];
     const segJobs = T * (cfg.pct / 100);
     const pOff = cfg.off / 100;
-    const pSrc = cfg.src / 100;
+    const pSrc = screenOnly ? 0 : cfg.src / 100;
 
     const usJobs  = segJobs * (1 - pOff);
     const offJobs = segJobs * pOff;
@@ -474,26 +480,21 @@ function calcTotal(cm, vm, platformMonths, platformDiscountMult) {
       { jobs: offJobs * pSrc,       mode: 'source', salaryK: cfg.salOff },
     ];
 
-    let segFee = 0;
     subSegs.forEach(ss => {
       if (ss.jobs < 0.01) return;
-      segFee += cph({ mode: ss.mode, salaryK: ss.salaryK, gm, rm, cm, vm }) * ss.jobs;
-    });
-
-    recruit += segFee;
-    lines.push({
-      seg, label: seg === 'hs' ? 'High-Skill' : 'Low-Skill',
-      segJobs, segFee,
-      blendedPerHire: segJobs > 0 ? segFee / segJobs : 0,
+      const fee = cph({ mode: ss.mode, salaryK: ss.salaryK, gm, rm, cm, vm }) * ss.jobs;
+      if (ss.mode === 'screen') screenFees += fee; else sourceFees += fee;
     });
   });
 
-  // Platform fee — auto enterprise above threshold, discounted by platformDiscountMult
+  const recruit = screenFees + sourceFees;
+
+  // Platform fee
   const isEnterprise = T >= S.pfThreshold;
   const pfeeMonthly = (isEnterprise ? S.pfEnterprise : S.pfStandard) * platformDiscountMult;
   const pfeeTotal = pfeeMonthly * platformMonths;
 
-  return { recruit, pfeeTotal, pfeeMonthly, total: recruit + pfeeTotal, lines, isEnterprise };
+  return { screenFees, sourceFees, recruit, pfeeTotal, pfeeMonthly, total: recruit + pfeeTotal, isEnterprise };
 }
 
 function fmt(n) { return n >= 1000 ? '$' + (n/1000).toFixed(1).replace(/\.0$/,'') + 'k' : '$' + Math.round(n).toLocaleString(); }
@@ -590,14 +591,14 @@ function update() {
     : `<span class="badge bb">Standard (${T} jobs < ${S.pfThreshold})</span>`;
 
   // ── Calc scenarios ──
-  // Annual = baseline (1.0×). Monthly and OD carry premiums over annual.
-  // platformDiscountMult is always 1.0 — annual IS the base rate, no discount applied.
-  // 1. Subscription annual — baseline rate, 12 months platform
-  const subAnnual  = calcTotal(1.0,          volMult, 12,         1.0);
-  // 2. Subscription monthly — monthly premium over annual, 12 months platform
-  const subMonthly = calcTotal(monthlyMult,  volMult, 12,         1.0);
-  // 3. On-demand per hire — OD premium over annual, platform for odMonths only
-  const odPerHire  = calcTotal(odMult,       1.0,     S.odMonths, 1.0);
+  // Screen-only variants (src % forced to 0)
+  const soAnnual  = calcTotal(1.0,         volMult, 12,         1.0, true);
+  const soMonthly = calcTotal(monthlyMult, volMult, 12,         1.0, true);
+  const soOD      = calcTotal(odMult,      1.0,     S.odMonths, 1.0, true);
+  // Mixed variants (uses configured src %)
+  const subAnnual  = calcTotal(1.0,         volMult, 12,         1.0, false);
+  const subMonthly = calcTotal(monthlyMult, volMult, 12,         1.0, false);
+  const odPerHire  = calcTotal(odMult,      1.0,     S.odMonths, 1.0, false);
 
   const totalSrc = Math.round(T * S.hs.pct / 100 * S.hs.src / 100) + Math.round(T * S.ls.pct / 100 * S.ls.src / 100);
   const totalOff = Math.round(T * S.hs.pct / 100 * S.hs.off / 100) + Math.round(T * S.ls.pct / 100 * S.ls.off / 100);
@@ -610,106 +611,102 @@ function update() {
   if (S.guarantee !== 'standard') sharedPills.push([S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']);
   if (S.rush !== 'standard') sharedPills.push([S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']);
 
-  // ── Scenario table ──
-  // Implied cost per qualified candidate = total recruiting fee / total qualified candidates
-  const subAnnualCPQ  = subAnnual.recruit  / totalQual;
-  const subMonthlyCPQ = subMonthly.recruit / totalQual;
-  const odPerHireCPQ  = odPerHire.recruit  / totalQual;
-
   function pills(list) {
     return list.map(([t,c]) => `<span class="badge ${c}" style="margin-right:3px;margin-top:3px;">${t}</span>`).join('');
   }
 
-  const scenarios = [
-    {
-      name: 'Subscription · Annual Commit',
-      pills: [
-        ['Baseline rate', 'bg'],
-        ...(volMult < 1 ? [[`${S.volDiscount}% vol discount`, 'bg']] : []),
-        ...sharedPills,
-      ],
-      acv: subAnnual.total,
-      perHire: subAnnual.total / T,
-      cpq: subAnnualCPQ,
-      pfeeLabel: `${fmtF(subAnnual.pfeeTotal)}/yr (${fmtF(subAnnual.pfeeMonthly)}/mo)`,
-      pfee: subAnnual.pfeeTotal,
-      rfee: subAnnual.recruit,
-      badge: 'bg', btxt: 'Best value', hl: true,
-    },
-    {
-      name: 'Subscription · Monthly',
-      pills: [
-        [`+${S.monthlyPremium}% vs annual`, 'bb'],
-        ...(volMult < 1 ? [[`${S.volDiscount}% vol discount`, 'bg']] : []),
-        ...sharedPills,
-      ],
-      acv: subMonthly.total,
-      perHire: subMonthly.total / T,
-      cpq: subMonthlyCPQ,
-      pfeeLabel: `${fmtF(subMonthly.pfeeTotal)}/yr (${fmtF(subMonthly.pfeeMonthly)}/mo)`,
-      pfee: subMonthly.pfeeTotal,
-      rfee: subMonthly.recruit,
-      badge: 'bb', btxt: 'Flexible', hl: false,
-    },
-    {
-      name: 'On-Demand · Per Hire',
-      pills: [
-        [`+${S.odPremium}% vs annual`, 'by'],
-        [`Platform: ${S.odMonths}mo used`, 'bm'],
-        ...sharedPills,
-      ],
-      acv: odPerHire.total,
-      perHire: odPerHire.total / T,
-      cpq: odPerHireCPQ,
-      pfeeLabel: `${fmtF(odPerHire.pfeeTotal)} (${S.odMonths}mo)`,
-      pfee: odPerHire.pfeeTotal,
-      rfee: odPerHire.recruit,
-      badge: 'by', btxt: `+${S.odPremium}% vs annual`, hl: false,
-    },
-  ];
+  function renderTable(elId, rows) {
+    const hasSourcing = rows.some(r => r.sourceFees > 0);
+    document.getElementById(elId).innerHTML =
+      `<thead><tr>
+        <th style="width:30%">Scenario</th>
+        <th class="r">Platform Fee</th>
+        <th class="r">Screen Fees</th>
+        ${hasSourcing ? `<th class="r">Sourced Fees</th>` : ''}
+        <th class="r">Annual Total</th>
+        <th class="r">Avg / Hire</th>
+        <th class="r">Implied / Qual Cand.</th>
+        <th></th>
+      </tr></thead><tbody>` +
+      rows.map(sc => {
+        const pfeePct = sc.acv > 0 ? (sc.pfee / sc.acv) * 100 : 0;
+        const pfeePctStr = sc.pfee > 0
+          ? `<div style="font-size:0.7rem;font-weight:600;color:${pfeePct > 30 ? '#dc2626' : 'var(--muted)'};">${pfeePct.toFixed(0)}% of total</div>`
+          : '';
+        return `<tr class="${sc.hl ? 'hl' : ''}">
+          <td><strong>${sc.name}</strong><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;">${pills(sc.pills)}</div></td>
+          <td class="r">${sc.pfee > 0 ? sc.pfeeLabel + pfeePctStr : '—'}</td>
+          <td class="r">${fmtF(sc.screenFees)}</td>
+          ${hasSourcing ? `<td class="r"><span style="color:#059669;font-weight:700;">${fmtF(sc.sourceFees)}</span>${sc.sourceFees > 0 ? `<div style="font-size:0.7rem;color:#059669;">replaces screen fee</div>` : '<div style="font-size:0.7rem;color:var(--muted);">—</div>'}</td>` : ''}
+          <td class="r"><span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${fmtF(sc.acv / 12)}/mo</div></td>
+          <td class="r">${fmtF(sc.perHire)}</td>
+          <td class="r"><strong>${fmtF(sc.cpq)}</strong></td>
+          <td><span class="badge ${sc.badge}">${sc.btxt}</span></td>
+        </tr>`;
+      }).join('') + '</tbody>';
+  }
 
-  // Break-even: how many hires does sub-annual become cheaper than OD per hire?
-  // sub-annual total = pfeeAnnual + recruitPerHire_annual * n
-  // od total         = pfeeOD + recruitPerHire_od * n
-  // solve: pfeeAnnual + subRecruitPH*n = pfeeOD + odRecruitPH*n
-  // n = (pfeeAnnual_discounted - pfeeOD) / (odRecruitPH - subRecruitPH)
-  const subRecruitPH = subAnnual.recruit / T;
-  const odRecruitPH  = odPerHire.recruit / T;
-  const breakEvenN   = (subAnnual.pfeeTotal - odPerHire.pfeeTotal) / (odRecruitPH - subRecruitPH);
+  function buildScenarios(annual, monthly, od, labelSuffix) {
+    const commitPills = (extra) => [
+      ...extra,
+      ...(volMult < 1 ? [[`${S.volDiscount}% vol discount`, 'bg']] : []),
+      ...(isEnterprise ? [['Enterprise platform', 'bp']] : []),
+      ...(totalOff > 0 ? [[`${totalOff} offshore`, 'bcy']] : []),
+      ...(S.guarantee !== 'standard' ? [[S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']] : []),
+      ...(S.rush !== 'standard' ? [[S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']] : []),
+    ];
+    return [
+      {
+        name: `Annual Commit${labelSuffix}`,
+        pills: commitPills([['Baseline rate', 'bg']]),
+        acv: annual.total, perHire: annual.total / T, cpq: annual.screenFees / totalQual,
+        pfeeLabel: `${fmtF(annual.pfeeTotal)}/yr (${fmtF(annual.pfeeMonthly)}/mo)`,
+        pfee: annual.pfeeTotal, screenFees: annual.screenFees, sourceFees: annual.sourceFees,
+        badge: 'bg', btxt: 'Best value', hl: true,
+      },
+      {
+        name: `Monthly${labelSuffix}`,
+        pills: commitPills([[`+${S.monthlyPremium}% vs annual`, 'bb']]),
+        acv: monthly.total, perHire: monthly.total / T, cpq: monthly.screenFees / totalQual,
+        pfeeLabel: `${fmtF(monthly.pfeeTotal)}/yr (${fmtF(monthly.pfeeMonthly)}/mo)`,
+        pfee: monthly.pfeeTotal, screenFees: monthly.screenFees, sourceFees: monthly.sourceFees,
+        badge: 'bb', btxt: 'Flexible', hl: false,
+      },
+      {
+        name: `On-Demand${labelSuffix}`,
+        pills: commitPills([[`+${S.odPremium}% vs annual`, 'by'], [`Platform: ${S.odMonths}mo used`, 'bm']]),
+        acv: od.total, perHire: od.total / T, cpq: od.screenFees / totalQual,
+        pfeeLabel: `${fmtF(od.pfeeTotal)} (${S.odMonths}mo)`,
+        pfee: od.pfeeTotal, screenFees: od.screenFees, sourceFees: od.sourceFees,
+        badge: 'by', btxt: `+${S.odPremium}% vs annual`, hl: false,
+      },
+    ];
+  }
+
+  const screenOnlyScenarios = buildScenarios(soAnnual, soMonthly, soOD, '');
+  const mixedScenarios      = buildScenarios(subAnnual, subMonthly, odPerHire, '');
+
+  renderTable('screenOnlyTbl', screenOnlyScenarios);
+  renderTable('mixedTbl', mixedScenarios);
+
+  const srcPct = Math.round((S.hs.pct / 100 * S.hs.src / 100 + S.ls.pct / 100 * S.ls.src / 100) * 100);
+  document.getElementById('sourcingSubtitle').textContent =
+    totalSrc > 0
+      ? `${totalSrc} of ${T} roles sourced from Replicant's pool (${srcPct}% of total). Sourced fees replace screen fees for those roles.`
+      : 'No sourcing configured — adjust "% we source" sliders above to see sourcing economics.';
+
+  // Break-even (based on screen-only annual vs OD for apples-to-apples)
+  const subRecruitPH = soAnnual.recruit / T;
+  const odRecruitPH  = soOD.recruit / T;
+  const breakEvenN   = (soAnnual.pfeeTotal - soOD.pfeeTotal) / (odRecruitPH - subRecruitPH);
   const beN = Math.ceil(breakEvenN);
   const breakEvenMsg = breakEvenN <= 0
-    ? `Subscription · Annual Commit is cheaper at any volume with this configuration.`
+    ? `Annual Commit is cheaper at any volume with this configuration.`
     : breakEvenN > 200
     ? `On-Demand is cheaper at any realistic volume with this configuration.`
     : T < beN
-    ? `At ${T} hire${T !== 1 ? 's' : ''}/year, On-Demand is currently cheaper. Subscription · Annual Commit becomes the better deal at ${beN}+ hires/year — each additional hire above that saves ${fmtF(odRecruitPH - subRecruitPH)}.`
-    : `At ${T} hire${T !== 1 ? 's' : ''}/year, Subscription · Annual Commit is the better deal (break-even was ${beN} hire${beN !== 1 ? 's' : ''}). Every hire saves ${fmtF(odRecruitPH - subRecruitPH)} vs On-Demand.`;
-
-  document.getElementById('scenarioTbl').innerHTML =
-    `<thead><tr>
-      <th style="width:36%">Scenario</th>
-      <th class="r">Platform Fee</th>
-      <th class="r">Recruiting Fees</th>
-      <th class="r">Annual Total</th>
-      <th class="r">Avg / Hire</th>
-      <th class="r">Implied / Qual Candidate</th>
-      <th></th>
-    </tr></thead><tbody>` +
-    scenarios.map(sc => {
-      const pfeePct = sc.acv > 0 ? (sc.pfee / sc.acv) * 100 : 0;
-      const pfeePctStr = sc.pfee > 0
-        ? `<div style="font-size:0.7rem;font-weight:600;color:${pfeePct > 30 ? '#dc2626' : 'var(--muted)'};">${pfeePct.toFixed(0)}% of total</div>`
-        : '';
-      return `<tr class="${sc.hl ? 'hl' : ''}">
-        <td><strong>${sc.name}</strong><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;">${pills(sc.pills)}</div></td>
-        <td class="r">${sc.pfee > 0 ? sc.pfeeLabel + pfeePctStr : '—'}</td>
-        <td class="r">${fmtF(sc.rfee)}</td>
-        <td class="r"><span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${fmtF(sc.acv / 12)}/mo</div></td>
-        <td class="r">${sc.perHire !== null ? fmtF(sc.perHire) : '—'}</td>
-        <td class="r"><strong>${fmtF(sc.cpq)}</strong></td>
-        <td><span class="badge ${sc.badge}">${sc.btxt}</span></td>
-      </tr>`;
-    }).join('') + '</tbody>';
+    ? `At ${T} hire${T !== 1 ? 's' : ''}/year, On-Demand is currently cheaper. Annual Commit becomes the better deal at ${beN}+ hires/year — each additional hire above that saves ${fmtF(odRecruitPH - subRecruitPH)}.`
+    : `At ${T} hire${T !== 1 ? 's' : ''}/year, Annual Commit is the better deal (break-even was ${beN} hire${beN !== 1 ? 's' : ''}). Every hire saves ${fmtF(odRecruitPH - subRecruitPH)} vs On-Demand.`;
 
   document.getElementById('qualCandidateNote').innerHTML =
     `<span style="color:var(--muted);">Implied cost / qualified candidate: ${S.appPerJob} applicants/job × ${S.qualRate}% qual rate = ${qualPerJob} qual candidates/job · ${totalQual} total across ${T} roles.</span>`
