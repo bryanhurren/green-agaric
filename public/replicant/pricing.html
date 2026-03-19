@@ -384,18 +384,22 @@
   <div style="display:flex;flex-direction:column;gap:16px;">
 
     <div class="result-card">
-      <h2>Screen Only — Commitment Scenarios</h2>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">All roles screened. No sourcing. Platform + screen fees only.</div>
-      <table class="stbl" id="screenOnlyTbl"></table>
-      <div style="margin-top:14px;" id="benchmarksSO"></div>
-    </div>
-
-    <div class="result-card">
-      <h2>With Sourcing — Commitment Scenarios</h2>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;" id="sourcingSubtitle"></div>
-      <table class="stbl" id="mixedTbl"></table>
-      <div style="margin-top:14px;" id="benchmarksMix"></div>
-      <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);" id="qualCandidateNote"></div>
+      <h2>Commitment Scenarios</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div>
+          <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">Screen Only</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">All roles screened. No sourcing. Platform + screen fees only.</div>
+          <table class="stbl" id="screenOnlyTbl"></table>
+          <div style="margin-top:14px;" id="benchmarksSO"></div>
+        </div>
+        <div>
+          <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">With Sourcing</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;" id="sourcingSubtitle"></div>
+          <table class="stbl" id="mixedTbl"></table>
+          <div style="margin-top:14px;" id="benchmarksMix"></div>
+          <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);" id="qualCandidateNote"></div>
+        </div>
+      </div>
     </div>
 
     <div class="row2">
