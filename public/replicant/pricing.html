@@ -352,7 +352,7 @@
       <div class="note" style="margin-bottom:10px;">Always required. Annual commit is the baseline rate. On-demand billed per month used only. Enterprise auto-applies at ≥ threshold jobs/yr.</div>
       <div style="margin-bottom:10px;">
         <div class="field-label">Standard monthly fee</div>
-        <div class="sl"><input type="range" id="pfStandard" min="0" max="3000" value="500" step="50" oninput="update()"><span class="sv" id="pfStandardVal">$500/mo</span></div>
+        <div class="sl"><input type="range" id="pfStandard" min="0" max="3000" value="100" step="50" oninput="update()"><span class="sv" id="pfStandardVal">$100/mo</span></div>
       </div>
       <div style="margin-bottom:10px;">
         <div class="field-label">Enterprise monthly fee</div>
@@ -457,7 +457,7 @@ const S = {
   odPremium: 50,
   volThresh: 24,
   volDiscount: 20,
-  pfStandard: 500,
+  pfStandard: 100,
   pfEnterprise: 1000,
   pfThreshold: 12,
   hiresPerMonth: 2,
