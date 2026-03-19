@@ -696,7 +696,7 @@ function update() {
       {
         name: `Annual Commit${labelSuffix}`,
         pills: commitPills([['Baseline rate', 'bg']]),
-        acv: annual.total, perHire: annual.total / T, cpq: annual.screenFees / totalQual,
+        acv: annual.total, perHire: annual.total / T, cpq: annual.recruit / totalQual,
         pfeeLabel: `${fmtF(annual.pfeeTotal)}/yr (${fmtF(annual.pfeeMonthly)}/mo)`,
         pfee: annual.pfeeTotal, screenFees: annual.screenFees, sourceFees: annual.sourceFees,
         badge: 'bg', btxt: 'Best value', hl: true,
@@ -704,7 +704,7 @@ function update() {
       {
         name: `Monthly${labelSuffix}`,
         pills: commitPills([[`+${S.monthlyPremium}% vs annual`, 'bb']]),
-        acv: monthly.total, perHire: monthly.total / T, cpq: monthly.screenFees / totalQual,
+        acv: monthly.total, perHire: monthly.total / T, cpq: monthly.recruit / totalQual,
         pfeeLabel: `${fmtF(monthly.pfeeTotal)}/yr (${fmtF(monthly.pfeeMonthly)}/mo)`,
         pfee: monthly.pfeeTotal, screenFees: monthly.screenFees, sourceFees: monthly.sourceFees,
         badge: 'bb', btxt: 'Flexible', hl: false,
@@ -712,7 +712,7 @@ function update() {
       {
         name: `On-Demand${labelSuffix}`,
         pills: commitPills([[`+${S.odPremium}% vs annual`, 'by'], [`Platform: ${odMonths}mo`, 'bm']]),
-        acv: od.total, perHire: od.total / T, cpq: od.screenFees / totalQual,
+        acv: od.total, perHire: od.total / T, cpq: od.recruit / totalQual,
         pfeeLabel: `${fmtF(od.pfeeTotal)} (${odMonths}mo)`,
         pfee: od.pfeeTotal, screenFees: od.screenFees, sourceFees: od.sourceFees,
         badge: 'by', btxt: `+${S.odPremium}% vs annual`, hl: false,
