@@ -390,6 +390,7 @@
           <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">Screen Only</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">All roles screened. No sourcing. Platform + screen fees only.</div>
           <table class="stbl" id="screenOnlyTbl"></table>
+          <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);" id="qualCandidateNoteSO"></div>
           <div style="margin-top:14px;" id="benchmarksSO"></div>
         </div>
         <div>
@@ -710,9 +711,11 @@ function update() {
     ? `At ${T} hire${T !== 1 ? 's' : ''}/year, On-Demand is currently cheaper. Annual Commit becomes the better deal at ${beN}+ hires/year — each additional hire above that saves ${fmtF(odRecruitPH - subRecruitPH)}.`
     : `At ${T} hire${T !== 1 ? 's' : ''}/year, Annual Commit is the better deal (break-even was ${beN} hire${beN !== 1 ? 's' : ''}). Every hire saves ${fmtF(odRecruitPH - subRecruitPH)} vs On-Demand.`;
 
-  document.getElementById('qualCandidateNote').innerHTML =
-    `<span style="color:var(--muted);">Implied cost / qualified candidate: ${S.appPerJob} applicants/job × ${S.qualRate}% qual rate = ${qualPerJob} qual candidates/job · ${totalQual} total across ${T} roles.</span>`
-    + `<div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#166534;font-size:0.78rem;">⚖️ <strong>Break-even:</strong> ${breakEvenMsg}</div>`;
+  const qualNote = `<span style="color:var(--muted);">Implied cost / qual candidate: ${S.appPerJob} applicants/job × ${S.qualRate}% qual rate = ${qualPerJob} qual/job · ${totalQual} total across ${T} roles.</span>`;
+  const beBox = `<div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#166534;font-size:0.78rem;">⚖️ <strong>Break-even:</strong> ${breakEvenMsg}</div>`;
+
+  document.getElementById('qualCandidateNoteSO').innerHTML = qualNote + beBox;
+  document.getElementById('qualCandidateNote').innerHTML   = qualNote;
 
   // ── Benchmarks ──
   const blendedSal = (
