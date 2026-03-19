@@ -698,24 +698,26 @@ function update() {
       ? `${totalSrc} of ${T} roles sourced from Replicant's pool (${srcPct}% of total). Sourced fees replace screen fees for those roles.`
       : 'No sourcing configured — adjust "% we source" sliders above to see sourcing economics.';
 
-  // Break-even (based on screen-only annual vs OD for apples-to-apples)
-  const subRecruitPH = soAnnual.recruit / T;
-  const odRecruitPH  = soOD.recruit / T;
-  const breakEvenN   = (soAnnual.pfeeTotal - soOD.pfeeTotal) / (odRecruitPH - subRecruitPH);
-  const beN = Math.ceil(breakEvenN);
-  const breakEvenMsg = breakEvenN <= 0
-    ? `Annual Commit is cheaper at any volume with this configuration.`
-    : breakEvenN > 200
-    ? `On-Demand is cheaper at any realistic volume with this configuration.`
-    : T < beN
-    ? `At ${T} hire${T !== 1 ? 's' : ''}/year, On-Demand is currently cheaper. Annual Commit becomes the better deal at ${beN}+ hires/year — each additional hire above that saves ${fmtF(odRecruitPH - subRecruitPH)}.`
-    : `At ${T} hire${T !== 1 ? 's' : ''}/year, Annual Commit is the better deal (break-even was ${beN} hire${beN !== 1 ? 's' : ''}). Every hire saves ${fmtF(odRecruitPH - subRecruitPH)} vs On-Demand.`;
+  function calcBreakEven(annual, od) {
+    const annualRPH = annual.recruit / T;
+    const odRPH     = od.recruit / T;
+    const n         = (annual.pfeeTotal - od.pfeeTotal) / (odRPH - annualRPH);
+    const beN       = Math.ceil(n);
+    const savings   = fmtF(odRPH - annualRPH);
+    return n <= 0
+      ? `Annual Commit is cheaper at any volume with this configuration.`
+      : n > 200
+      ? `On-Demand is cheaper at any realistic volume with this configuration.`
+      : T < beN
+      ? `At ${T} hire${T !== 1 ? 's' : ''}/year, On-Demand is currently cheaper. Annual Commit becomes the better deal at ${beN}+ hires/year — each additional hire above that saves ${savings}.`
+      : `At ${T} hire${T !== 1 ? 's' : ''}/year, Annual Commit is the better deal (break-even was ${beN} hire${beN !== 1 ? 's' : ''}). Every hire saves ${savings} vs On-Demand.`;
+  }
 
   const qualNote = `<span style="color:var(--muted);">Implied cost / qual candidate: ${S.appPerJob} applicants/job × ${S.qualRate}% qual rate = ${qualPerJob} qual/job · ${totalQual} total across ${T} roles.</span>`;
-  const beBox = `<div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#166534;font-size:0.78rem;">⚖️ <strong>Break-even:</strong> ${breakEvenMsg}</div>`;
+  function beBox(msg) { return `<div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#166534;font-size:0.78rem;">⚖️ <strong>Break-even:</strong> ${msg}</div>`; }
 
-  document.getElementById('qualCandidateNoteSO').innerHTML = qualNote + beBox;
-  document.getElementById('qualCandidateNote').innerHTML   = qualNote;
+  document.getElementById('qualCandidateNoteSO').innerHTML = qualNote + beBox(calcBreakEven(soAnnual, soOD));
+  document.getElementById('qualCandidateNote').innerHTML   = qualNote + beBox(calcBreakEven(subAnnual, odPerHire));
 
   // ── Benchmarks ──
   const blendedSal = (
