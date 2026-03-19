@@ -22,9 +22,21 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
 
-  header { background: var(--brand); color: white; padding: 15px 32px; display: flex; align-items: center; justify-content: space-between; }
-  header h1 { font-size: 1.05rem; font-weight: 600; }
-  .hbadge { font-size: 0.72rem; opacity: 0.5; background: rgba(255,255,255,0.12); padding: 3px 10px; border-radius: 12px; }
+  header { background: var(--brand); color: white; padding: 12px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 600; white-space: nowrap; }
+  .hbadge { font-size: 0.72rem; opacity: 0.5; background: rgba(255,255,255,0.12); padding: 3px 10px; border-radius: 12px; white-space: nowrap; }
+  .cfg-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .cfg-bar select { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 5px 10px; font-size: 0.8rem; cursor: pointer; outline: none; min-width: 180px; }
+  .cfg-bar select option { background: #1e293b; color: white; }
+  .cfg-bar input[type=text] { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 5px 10px; font-size: 0.8rem; outline: none; width: 160px; }
+  .cfg-bar input[type=text]::placeholder { color: rgba(255,255,255,0.4); }
+  .cfg-bar input[type=text]:focus { border-color: #B0FA7B; }
+  .cfg-btn { padding: 5px 12px; border-radius: 6px; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .cfg-btn.save   { background: #B0FA7B; color: #0D1117; }
+  .cfg-btn.saveas { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+  .cfg-btn.del    { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+  .cfg-btn:hover.save   { background: #9de862; }
+  .cfg-btn:disabled { opacity: 0.4; cursor: default; }
 
   .page { max-width: 1320px; margin: 0 auto; padding: 24px 24px 48px; }
 
@@ -141,8 +153,19 @@
 </script>
 <div id="tooltip"></div>
 <header>
-  <h1>Replicant Pricing Configurator</h1>
-  <span class="hbadge">Internal Use Only</span>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h1>Replicant Pricing Configurator</h1>
+    <span class="hbadge">Internal Use Only</span>
+  </div>
+  <div class="cfg-bar">
+    <select id="cfgSelect" onchange="loadConfig()">
+      <option value="">— Load saved config —</option>
+    </select>
+    <input type="text" id="cfgName" placeholder="Config name…" />
+    <button class="cfg-btn save" onclick="saveConfig()">Save</button>
+    <button class="cfg-btn saveas" onclick="saveAsConfig()">Save As</button>
+    <button class="cfg-btn del" onclick="deleteConfig()">Delete</button>
+  </div>
 </header>
 
 <div class="page">
@@ -799,6 +822,113 @@ function update() {
 }
 
 update();
+
+// ── Config save/load ────────────────────────────────────────────────────────
+const STORE_KEY = 'replicant_configs';
+let currentConfigName = null;
+
+function getConfigs() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
+}
+function setConfigs(obj) { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }
+
+function snapshotState() {
+  // Read current DOM state into a plain object
+  const snap = JSON.parse(JSON.stringify(S));
+  snap.guarantee = S.guarantee;
+  snap.rush      = S.rush;
+  snap.offMkt    = S.offMkt;
+  return snap;
+}
+
+function applySnapshot(snap) {
+  // Apply all slider/select values from saved state
+  const setSlider = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  setSlider('totalJobs',     snap.totalJobs);
+  setSlider('appPerJob',     snap.appPerJob);
+  setSlider('qualRate',      snap.qualRate);
+  setSlider('hiresPerMonth', snap.hiresPerMonth);
+  setSlider('screenPct',     snap.screenPct);
+  setSlider('sourcePct',     snap.sourcePct);
+  setSlider('monthlyPremium',snap.monthlyPremium);
+  setSlider('odPremium',     snap.odPremium);
+  setSlider('volThresh',     snap.volThresh);
+  setSlider('volDiscount',   snap.volDiscount);
+  setSlider('pfStandard',    snap.pfStandard);
+  setSlider('pfEnterprise',  snap.pfEnterprise);
+  setSlider('pfThreshold',   snap.pfThreshold);
+  setSlider('recHourly',     snap.recHourly);
+  setSlider('recHours',      snap.recHours);
+  setSlider('adSpend',       snap.adSpend);
+  setSlider('hs-pct',        snap.hs.pct);
+  setSlider('hs-src',        snap.hs.src);
+  setSlider('hs-sal-us',     snap.hs.salUS);
+  setSlider('hs-sal-off',    snap.hs.salOff);
+  setSlider('hs-off',        snap.hs.off);
+  setSlider('ls-src',        snap.ls.src);
+  setSlider('ls-sal-us',     snap.ls.salUS);
+  setSlider('ls-sal-off',    snap.ls.salOff);
+  setSlider('ls-off',        snap.ls.off);
+  document.getElementById('offMkt').value = snap.offMkt;
+  setGuar(snap.guarantee);
+  setRush(snap.rush);
+  update();
+}
+
+function refreshDropdown() {
+  const sel = document.getElementById('cfgSelect');
+  const configs = getConfigs();
+  const names = Object.keys(configs).sort();
+  sel.innerHTML = '<option value="">— Load saved config —</option>' +
+    names.map(n => `<option value="${n}"${n === currentConfigName ? ' selected' : ''}>${n}</option>`).join('');
+}
+
+function loadConfig() {
+  const name = document.getElementById('cfgSelect').value;
+  if (!name) return;
+  const configs = getConfigs();
+  if (!configs[name]) return;
+  currentConfigName = name;
+  document.getElementById('cfgName').value = name;
+  applySnapshot(configs[name]);
+}
+
+function saveConfig() {
+  const name = currentConfigName || document.getElementById('cfgName').value.trim();
+  if (!name) { alert('Enter a config name first.'); return; }
+  const configs = getConfigs();
+  configs[name] = snapshotState();
+  setConfigs(configs);
+  currentConfigName = name;
+  document.getElementById('cfgName').value = name;
+  refreshDropdown();
+}
+
+function saveAsConfig() {
+  const name = document.getElementById('cfgName').value.trim();
+  if (!name) { alert('Enter a name for the new config.'); return; }
+  const configs = getConfigs();
+  configs[name] = snapshotState();
+  setConfigs(configs);
+  currentConfigName = name;
+  refreshDropdown();
+}
+
+function deleteConfig() {
+  const name = document.getElementById('cfgSelect').value;
+  if (!name) return;
+  if (!confirm(`Delete "${name}"?`)) return;
+  const configs = getConfigs();
+  delete configs[name];
+  setConfigs(configs);
+  if (currentConfigName === name) {
+    currentConfigName = null;
+    document.getElementById('cfgName').value = '';
+  }
+  refreshDropdown();
+}
+
+refreshDropdown();
 
 // ── Tooltip ────────────────────────────────────────────────────────────────
 const tip = document.getElementById('tooltip');
