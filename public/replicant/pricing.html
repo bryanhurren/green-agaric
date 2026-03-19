@@ -180,19 +180,6 @@
           <div style="font-size:1.3rem;font-weight:900;color:var(--accent);margin-top:4px;" id="qualCountVal">6</div>
           <div style="font-size:0.7rem;color:var(--muted);">derived: applicants × qual rate</div>
         </div>
-        <div style="grid-column:span 2;"><hr class="div"></div>
-        <div>
-          <div class="field-label">DIY: recruiter hourly rate</div>
-          <div class="sl"><input type="range" id="recHourly" min="25" max="150" value="60" step="5" oninput="update()"><span class="sv" id="recHourlyVal">$60/hr</span></div>
-        </div>
-        <div>
-          <div class="field-label">DIY: hrs spent per hire</div>
-          <div class="sl"><input type="range" id="recHours" min="10" max="120" value="40" step="5" oninput="update()"><span class="sv" id="recHoursVal">40 hrs</span></div>
-        </div>
-        <div>
-          <div class="field-label">DIY: job ad spend / role</div>
-          <div class="sl"><input type="range" id="adSpend" min="0" max="1000" value="300" step="50" oninput="update()"><span class="sv" id="adSpendVal">$300</span></div>
-        </div>
       </div>
     </div>
 
@@ -384,22 +371,26 @@
   <div style="display:flex;flex-direction:column;gap:16px;">
 
     <div class="result-card">
-      <h2>Commitment Scenarios</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <h2>Commitment Scenarios — Screen Only</h2>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;">All roles screened. No sourcing. Platform + screen fees only.</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;">
         <div>
-          <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">Screen Only</div>
-          <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">All roles screened. No sourcing. Platform + screen fees only.</div>
           <table class="stbl" id="screenOnlyTbl"></table>
           <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);" id="qualCandidateNoteSO"></div>
-          <div style="margin-top:14px;" id="benchmarksSO"></div>
         </div>
+        <div id="benchmarksSO"></div>
+      </div>
+    </div>
+
+    <div class="result-card">
+      <h2>Commitment Scenarios — With Sourcing</h2>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;" id="sourcingSubtitle"></div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;">
         <div>
-          <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;">With Sourcing</div>
-          <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;" id="sourcingSubtitle"></div>
           <table class="stbl" id="mixedTbl"></table>
           <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);" id="qualCandidateNote"></div>
-          <div style="margin-top:14px;" id="benchmarksMix"></div>
         </div>
+        <div id="benchmarksMix"></div>
       </div>
     </div>
 
@@ -407,6 +398,23 @@
       <div class="result-card">
         <h2>Mix Summary</h2>
         <div id="mixSummary"></div>
+      </div>
+      <div class="result-card">
+        <h2>DIY Recruiting Assumptions</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;">
+          <div>
+            <div class="field-label">Recruiter hourly rate</div>
+            <div class="sl"><input type="range" id="recHourly" min="25" max="150" value="60" step="5" oninput="update()"><span class="sv" id="recHourlyVal">$60/hr</span></div>
+          </div>
+          <div>
+            <div class="field-label">Hours spent per hire</div>
+            <div class="sl"><input type="range" id="recHours" min="10" max="120" value="40" step="5" oninput="update()"><span class="sv" id="recHoursVal">40 hrs</span></div>
+          </div>
+          <div>
+            <div class="field-label">Job ad spend / role</div>
+            <div class="sl"><input type="range" id="adSpend" min="0" max="1000" value="300" step="50" oninput="update()"><span class="sv" id="adSpendVal">$300</span></div>
+          </div>
+        </div>
       </div>
     </div>
 
