@@ -180,6 +180,13 @@
           <div style="font-size:1.3rem;font-weight:900;color:var(--accent);margin-top:4px;" id="qualCountVal">6</div>
           <div style="font-size:0.7rem;color:var(--muted);">derived: applicants × qual rate</div>
         </div>
+        <div>
+          <div class="field-label">Avg hires / month (for on-demand)</div>
+          <div class="sl">
+            <input type="range" id="hiresPerMonth" min="1" max="12" value="2" step="1" oninput="update()">
+            <span class="sv" id="hiresPerMonthVal">2/mo → 12 months</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -332,10 +339,6 @@
         <div class="field-label">Enterprise threshold (jobs/yr)</div>
         <div class="sl"><input type="range" id="pfThreshold" min="1" max="36" value="12" step="1" oninput="update()"><span class="sv" id="pfThresholdVal">12 jobs/yr</span></div>
       </div>
-      <div>
-        <div class="field-label">On-demand: months platform used</div>
-        <div class="sl"><input type="range" id="odMonths" min="1" max="12" value="3" step="1" oninput="update()"><span class="sv" id="odMonthsVal">3 months</span></div>
-      </div>
     </div>
 
     <div class="card">
@@ -438,7 +441,7 @@ const S = {
   pfStandard: 500,
   pfEnterprise: 1000,
   pfThreshold: 12,
-  odMonths: 3,
+  hiresPerMonth: 2,
   recHourly: 60,
   recHours: 40,
   adSpend: 300,
@@ -526,7 +529,7 @@ function update() {
   S.pfStandard       = parseInt(document.getElementById('pfStandard').value);
   S.pfEnterprise     = parseInt(document.getElementById('pfEnterprise').value);
   S.pfThreshold      = parseInt(document.getElementById('pfThreshold').value);
-  S.odMonths         = parseInt(document.getElementById('odMonths').value);
+  S.hiresPerMonth    = parseInt(document.getElementById('hiresPerMonth').value);
   S.recHourly        = parseInt(document.getElementById('recHourly').value);
   S.recHours         = parseInt(document.getElementById('recHours').value);
   S.adSpend          = parseInt(document.getElementById('adSpend').value);
@@ -571,7 +574,8 @@ function update() {
   document.getElementById('pfStandardVal').textContent   = '$' + S.pfStandard + '/mo';
   document.getElementById('pfEnterpriseVal').textContent = '$' + S.pfEnterprise + '/mo';
   document.getElementById('pfThresholdVal').textContent  = S.pfThreshold + ' jobs/yr';
-  document.getElementById('odMonthsVal').textContent     = S.odMonths + (S.odMonths === 1 ? ' month' : ' months');
+  const odMonths = Math.min(12, Math.ceil(T / S.hiresPerMonth));
+  document.getElementById('hiresPerMonthVal').textContent = `${S.hiresPerMonth}/mo → ${odMonths} month${odMonths !== 1 ? 's' : ''} platform`;
   document.getElementById('recHourlyVal').textContent    = '$' + S.recHourly + '/hr';
   document.getElementById('recHoursVal').textContent     = S.recHours + ' hrs';
   document.getElementById('adSpendVal').textContent      = '$' + S.adSpend;
@@ -605,11 +609,11 @@ function update() {
   // Screen-only variants (src % forced to 0)
   const soAnnual  = calcTotal(1.0,         volMult, 12,         1.0, true);
   const soMonthly = calcTotal(monthlyMult, volMult, 12,         1.0, true);
-  const soOD      = calcTotal(odMult,      1.0,     S.odMonths, 1.0, true);
+  const soOD      = calcTotal(odMult,      1.0,     odMonths, 1.0, true);
   // Mixed variants (uses configured src %)
-  const subAnnual  = calcTotal(1.0,         volMult, 12,         1.0, false);
-  const subMonthly = calcTotal(monthlyMult, volMult, 12,         1.0, false);
-  const odPerHire  = calcTotal(odMult,      1.0,     S.odMonths, 1.0, false);
+  const subAnnual  = calcTotal(1.0,         volMult, 12,       1.0, false);
+  const subMonthly = calcTotal(monthlyMult, volMult, 12,       1.0, false);
+  const odPerHire  = calcTotal(odMult,      1.0,     odMonths, 1.0, false);
 
   const totalSrc = Math.round(T * S.hs.pct / 100 * S.hs.src / 100) + Math.round(T * S.ls.pct / 100 * S.ls.src / 100);
   const totalOff = Math.round(T * S.hs.pct / 100 * S.hs.off / 100) + Math.round(T * S.ls.pct / 100 * S.ls.off / 100);
@@ -648,7 +652,7 @@ function update() {
           <td><strong>${sc.name}</strong><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;">${pills(sc.pills)}</div></td>
           <td class="r">${sc.pfee > 0 ? sc.pfeeLabel + pfeePctStr : '—'}</td>
           <td class="r">${fmtF(sc.screenFees)}</td>
-          ${hasSourcing ? `<td class="r"><span style="color:#059669;font-weight:700;">${fmtF(sc.sourceFees)}</span>${sc.sourceFees > 0 ? `<div style="font-size:0.7rem;color:#059669;">replaces screen fee</div>` : '<div style="font-size:0.7rem;color:var(--muted);">—</div>'}</td>` : ''}
+          ${hasSourcing ? `<td class="r"><span style="color:#059669;font-weight:700;">${sc.sourceFees > 0 ? fmtF(sc.sourceFees) + ' *' : '—'}</span></td>` : ''}
           <td class="r"><span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${fmtF(sc.acv / 12)}/mo</div></td>
           <td class="r">${fmtF(sc.perHire)}</td>
           <td class="r"><strong>${fmtF(sc.cpq)}</strong></td>
@@ -685,9 +689,9 @@ function update() {
       },
       {
         name: `On-Demand${labelSuffix}`,
-        pills: commitPills([[`+${S.odPremium}% vs annual`, 'by'], [`Platform: ${S.odMonths}mo used`, 'bm']]),
+        pills: commitPills([[`+${S.odPremium}% vs annual`, 'by'], [`Platform: ${odMonths}mo`, 'bm']]),
         acv: od.total, perHire: od.total / T, cpq: od.screenFees / totalQual,
-        pfeeLabel: `${fmtF(od.pfeeTotal)} (${S.odMonths}mo)`,
+        pfeeLabel: `${fmtF(od.pfeeTotal)} (${odMonths}mo)`,
         pfee: od.pfeeTotal, screenFees: od.screenFees, sourceFees: od.sourceFees,
         badge: 'by', btxt: `+${S.odPremium}% vs annual`, hl: false,
       },
@@ -724,8 +728,12 @@ function update() {
   const qualNote = `<span style="color:var(--muted);">Implied cost / qual candidate: ${S.appPerJob} applicants/job × ${S.qualRate}% qual rate = ${qualPerJob} qual/job · ${totalQual} total across ${T} roles.</span>`;
   function beBox(msg) { return `<div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#166534;font-size:0.78rem;">⚖️ <strong>Break-even:</strong> ${msg}</div>`; }
 
+  const srcFootnote = totalSrc > 0
+    ? `<div style="margin-top:6px;font-size:0.7rem;color:var(--muted);">* Sourced fees replace both screen and platform fees for those roles — customer pays the placement fee only, not double.</div>`
+    : '';
+
   document.getElementById('qualCandidateNoteSO').innerHTML = qualNote + beBox(calcBreakEven(soAnnual, soOD));
-  document.getElementById('qualCandidateNote').innerHTML   = qualNote + beBox(calcBreakEven(subAnnual, odPerHire));
+  document.getElementById('qualCandidateNote').innerHTML   = qualNote + beBox(calcBreakEven(subAnnual, odPerHire)) + srcFootnote;
 
   // ── Benchmarks ──
   const blendedSal = (
