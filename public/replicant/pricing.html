@@ -201,16 +201,16 @@
       <div class="slbl">Pricing Rates</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;">
         <div>
-          <div class="field-label">Screen-only: flat fee / role</div>
+          <div class="field-label">Screen-only: % of 1st yr salary</div>
           <div class="sl">
-            <input type="range" id="screenFeePerRole" min="500" max="8000" value="2000" step="100" oninput="update()">
-            <span class="sv" id="screenFeeVal">$2,000</span>
+            <input type="range" id="screenPct" min="1" max="15" value="4" step="0.5" oninput="update()">
+            <span class="sv" id="screenPctVal">4%</span>
           </div>
         </div>
         <div>
-          <div class="field-label">Sourced: % of salary (per hire)</div>
+          <div class="field-label">Sourced: % of 1st yr salary</div>
           <div class="sl">
-            <input type="range" id="sourcePct" min="3" max="20" value="10" step="0.5" oninput="update()">
+            <input type="range" id="sourcePct" min="1" max="25" value="10" step="0.5" oninput="update()">
             <span class="sv" id="sourcePctVal">10%</span>
           </div>
         </div>
@@ -403,7 +403,7 @@
   </div>
 
   <div class="disclaimer">
-    <strong>Internal use only.</strong> Pricing guide for account-level discussions. $25k ACV target calibrated to ~24 US mid-market roles/year on annual subscription. Annual commit is the baseline rate; monthly and on-demand carry configurable premiums over it. Screen-only priced as flat fee per role (with skill/location multipliers). Sourced roles priced as % of salary. Implied cost per qualified candidate is back-calculated from applicants × qual rate.
+    <strong>Internal use only.</strong> Pricing guide for account-level discussions. $25k ACV target calibrated to ~24 US mid-market roles/year on annual subscription. Annual commit is the baseline rate; monthly and on-demand carry configurable premiums over it. Screen-only and sourced roles both priced as % of first-year salary — salary difference between skill levels naturally drives the fee difference. Implied cost per qualified candidate is back-calculated from applicants × qual rate.
   </div>
 
 </div>
@@ -411,7 +411,7 @@
 <script>
 const S = {
   totalJobs: 24, appPerJob: 60, qualRate: 10,
-  screenFeePerRole: 2000,
+  screenPct: 4,
   sourcePct: 10,
   monthlyPremium: 25,
   odPremium: 50,
@@ -433,21 +433,17 @@ const S = {
 
 const G_MULT = { standard: 1.0, extended: 1.2, premium: 1.4 };
 const R_MULT = { standard: 1.0, rush: 1.25, superrush: 1.5 };
-// Skill multiplier applies to screen-only flat fee
-const SKILL_MULT = { hs: 1.5, ls: 1.0 };
 
 function setGuar(v) { S.guarantee = v; act('guarTg', ['standard','extended','premium'].indexOf(v)); update(); }
 function setRush(v) { S.rush = v; act('rushTg', ['standard','rush','superrush'].indexOf(v)); update(); }
 function act(id, i) { document.getElementById(id).querySelectorAll('button').forEach((b,j) => b.classList.toggle('active', i===j)); }
 
 // ── Cost per hire for one sub-segment ─────────────────────────────────────
-// mode: 'screen' | 'source'
-// commitMult: 1.0 for subscription, (1+odPremium/100) for on-demand
-// volMult: (1-volDiscount/100) if volume qualifies, else 1.0
-function cph({ mode, salaryK, skill, gm, rm, cm, vm }) {
-  const base = mode === 'screen'
-    ? S.screenFeePerRole * skill * gm * rm
-    : salaryK * 1000 * (S.sourcePct / 100) * skill * gm * rm;
+// Both screen and source are % of first year salary — salary difference between
+// HS and LS naturally drives the fee difference, no separate skill multiplier needed.
+function cph({ mode, salaryK, gm, rm, cm, vm }) {
+  const pct = mode === 'screen' ? S.screenPct : S.sourcePct;
+  const base = salaryK * 1000 * (pct / 100) * gm * rm;
   return base * cm * vm;
 }
 
@@ -464,7 +460,6 @@ function calcTotal(cm, vm, platformMonths, platformDiscountMult) {
 
   ['hs', 'ls'].forEach(seg => {
     const cfg = S[seg];
-    const skill = SKILL_MULT[seg];
     const segJobs = T * (cfg.pct / 100);
     const pOff = cfg.off / 100;
     const pSrc = cfg.src / 100;
@@ -482,7 +477,7 @@ function calcTotal(cm, vm, platformMonths, platformDiscountMult) {
     let segFee = 0;
     subSegs.forEach(ss => {
       if (ss.jobs < 0.01) return;
-      segFee += cph({ mode: ss.mode, salaryK: ss.salaryK, skill, gm, rm, cm, vm }) * ss.jobs;
+      segFee += cph({ mode: ss.mode, salaryK: ss.salaryK, gm, rm, cm, vm }) * ss.jobs;
     });
 
     recruit += segFee;
@@ -510,7 +505,7 @@ function update() {
   S.totalJobs        = parseInt(document.getElementById('totalJobs').value);
   S.appPerJob        = parseInt(document.getElementById('appPerJob').value);
   S.qualRate         = parseInt(document.getElementById('qualRate').value);
-  S.screenFeePerRole = parseInt(document.getElementById('screenFeePerRole').value);
+  S.screenPct        = parseFloat(document.getElementById('screenPct').value);
   S.sourcePct        = parseFloat(document.getElementById('sourcePct').value);
   S.monthlyPremium   = parseInt(document.getElementById('monthlyPremium').value);
   S.odPremium        = parseInt(document.getElementById('odPremium').value);
@@ -555,7 +550,7 @@ function update() {
   document.getElementById('appPerJobVal').textContent    = S.appPerJob;
   document.getElementById('qualRateVal').textContent     = S.qualRate + '%';
   document.getElementById('qualCountVal').textContent    = qualPerJob;
-  document.getElementById('screenFeeVal').textContent    = '$' + S.screenFeePerRole.toLocaleString();
+  document.getElementById('screenPctVal').textContent    = S.screenPct + '%';
   document.getElementById('sourcePctVal').textContent    = S.sourcePct + '%';
   document.getElementById('monthlyPremiumVal').textContent = '+' + S.monthlyPremium + '%';
   document.getElementById('odPremiumVal').textContent      = '+' + S.odPremium + '%';
