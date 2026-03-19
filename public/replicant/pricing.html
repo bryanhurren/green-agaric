@@ -180,8 +180,8 @@
         <div>
           <div class="field-label">Total jobs to fill</div>
           <div class="sl">
-            <input type="range" id="totalJobs" min="1" max="60" value="24" oninput="update()">
-            <span class="sv" id="totalJobsVal" style="font-size:1.1rem;min-width:70px;">24</span>
+            <input type="range" id="totalJobs" min="1" max="1000" value="24" oninput="syncJobsFromSlider()">
+            <input type="number" id="totalJobsNum" min="1" value="24" oninput="syncJobsFromNum()" style="width:64px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-size:1rem;font-weight:900;color:var(--accent);text-align:right;">
           </div>
         </div>
         <div>
@@ -206,7 +206,7 @@
         <div>
           <div class="field-label">Avg hires / month (for on-demand)</div>
           <div class="sl">
-            <input type="range" id="hiresPerMonth" min="1" max="12" value="2" step="1" oninput="update()">
+            <input type="range" id="hiresPerMonth" min="1" max="60" value="2" step="1" oninput="update()">
             <span class="sv" id="hiresPerMonthVal">2/mo → 12 months</span>
           </div>
         </div>
@@ -420,11 +420,7 @@
       </div>
     </div>
 
-    <div class="row2">
-      <div class="result-card">
-        <h2>Mix Summary</h2>
-        <div id="mixSummary"></div>
-      </div>
+    <div class="mb">
       <div class="result-card">
         <h2>DIY Recruiting Assumptions</h2>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;">
@@ -481,6 +477,8 @@ const R_MULT = { standard: 1.0, rush: 1.25, superrush: 1.5 };
 function setGuar(v) { S.guarantee = v; act('guarTg', ['standard','extended','premium'].indexOf(v)); update(); }
 function setRush(v) { S.rush = v; act('rushTg', ['standard','rush','superrush'].indexOf(v)); update(); }
 function act(id, i) { document.getElementById(id).querySelectorAll('button').forEach((b,j) => b.classList.toggle('active', i===j)); }
+function syncJobsFromSlider() { document.getElementById('totalJobsNum').value = document.getElementById('totalJobs').value; update(); }
+function syncJobsFromNum() { const v = Math.max(1, parseInt(document.getElementById('totalJobsNum').value) || 1); document.getElementById('totalJobs').value = Math.min(v, 1000); update(); }
 
 // ── Cost per hire for one sub-segment ─────────────────────────────────────
 // Both screen and source are % of first year salary — salary difference between
@@ -540,7 +538,7 @@ function pct(n) { return (n * 100).toFixed(1) + '%'; }
 
 function update() {
   // ── Read all inputs ──
-  S.totalJobs        = parseInt(document.getElementById('totalJobs').value);
+  S.totalJobs        = Math.max(1, parseInt(document.getElementById('totalJobsNum').value) || 1);
   S.appPerJob        = parseInt(document.getElementById('appPerJob').value);
   S.qualRate         = parseInt(document.getElementById('qualRate').value);
   S.screenPct        = parseFloat(document.getElementById('screenPct').value);
@@ -584,7 +582,8 @@ function update() {
   const odMult      = 1 + S.odPremium / 100;
 
   // ── Update display labels ──
-  document.getElementById('totalJobsVal').textContent    = T;
+  document.getElementById('totalJobs').value    = Math.min(T, 1000);
+  document.getElementById('totalJobsNum').value = T;
   document.getElementById('appPerJobVal').textContent    = S.appPerJob;
   document.getElementById('qualRateVal').textContent     = S.qualRate + '%';
   document.getElementById('qualCountVal').textContent    = qualPerJob;
@@ -798,27 +797,6 @@ function update() {
   renderBenchmarks('benchmarksSO',  soAnnual.total / T,    soOD.total / T);
   renderBenchmarks('benchmarksMix', subAnnual.total / T,   odPerHire.total / T);
 
-  // ── Mix summary ──
-  const mixRows = [
-    { label: 'High-Skill US',         jobs: Math.round(T * S.hs.pct / 100 * (1 - S.hs.off / 100)), sal: S.hs.salUS,  color: '#6366f1' },
-    { label: `High-Skill ${offLabel}`, jobs: Math.round(T * S.hs.pct / 100 * (S.hs.off / 100)),     sal: S.hs.salOff, color: '#a78bfa' },
-    { label: 'Low-Skill US',           jobs: Math.round(T * S.ls.pct / 100 * (1 - S.ls.off / 100)), sal: S.ls.salUS,  color: '#0891b2' },
-    { label: `Low-Skill ${offLabel}`,  jobs: Math.round(T * S.ls.pct / 100 * (S.ls.off / 100)),     sal: S.ls.salOff, color: '#67e8f9' },
-  ].filter(r => r.jobs > 0);
-
-  document.getElementById('mixSummary').innerHTML =
-    mixRows.map(r => `<div class="row">
-      <span class="lbl" style="display:flex;align-items:center;gap:6px;">
-        <span style="width:9px;height:9px;border-radius:2px;background:${r.color};display:inline-block;flex-shrink:0;"></span>${r.label}
-      </span>
-      <span class="val">${r.jobs} jobs</span>
-      <span class="badge bm">$${r.sal}k avg</span>
-    </div>`).join('') +
-    `<div class="row tot">
-      <span class="lbl">Total</span>
-      <span class="val">${T} jobs · ${(T / 12).toFixed(1)}/mo avg</span>
-      <span class="badge bb">${totalSrc} sourced · ${T - totalSrc} screen-only</span>
-    </div>`;
 }
 
 update();
@@ -844,7 +822,8 @@ function snapshotState() {
 function applySnapshot(snap) {
   // Apply all slider/select values from saved state
   const setSlider = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-  setSlider('totalJobs',     snap.totalJobs);
+  setSlider('totalJobs',    Math.min(snap.totalJobs, 1000));
+  setSlider('totalJobsNum', snap.totalJobs);
   setSlider('appPerJob',     snap.appPerJob);
   setSlider('qualRate',      snap.qualRate);
   setSlider('hiresPerMonth', snap.hiresPerMonth);
