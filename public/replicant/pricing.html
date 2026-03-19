@@ -203,8 +203,8 @@
         <div>
           <div class="field-label">Screen-only: % of 1st yr salary</div>
           <div class="sl">
-            <input type="range" id="screenPct" min="1" max="15" value="4" step="0.5" oninput="update()">
-            <span class="sv" id="screenPctVal">4%</span>
+            <input type="range" id="screenPct" min="0.5" max="15" value="1" step="0.5" oninput="update()">
+            <span class="sv" id="screenPctVal">1%</span>
           </div>
         </div>
         <div>
@@ -387,20 +387,18 @@
       <h2>Screen Only — Commitment Scenarios</h2>
       <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">All roles screened. No sourcing. Platform + screen fees only.</div>
       <table class="stbl" id="screenOnlyTbl"></table>
+      <div style="margin-top:14px;" id="benchmarksSO"></div>
     </div>
 
     <div class="result-card">
       <h2>With Sourcing — Commitment Scenarios</h2>
       <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;" id="sourcingSubtitle"></div>
       <table class="stbl" id="mixedTbl"></table>
+      <div style="margin-top:14px;" id="benchmarksMix"></div>
       <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);" id="qualCandidateNote"></div>
     </div>
 
     <div class="row2">
-      <div class="result-card">
-        <h2>Market Benchmarks (cost per hire, blended)</h2>
-        <div id="benchmarks"></div>
-      </div>
       <div class="result-card">
         <h2>Mix Summary</h2>
         <div id="mixSummary"></div>
@@ -418,7 +416,7 @@
 <script>
 const S = {
   totalJobs: 24, appPerJob: 60, qualRate: 10,
-  screenPct: 4,
+  screenPct: 1,
   sourcePct: 10,
   monthlyPremium: 25,
   odPremium: 50,
@@ -719,15 +717,12 @@ function update() {
     S.ls.salUS  * (S.ls.pct / 100) * (1 - S.ls.off / 100) +
     S.ls.salOff * (S.ls.pct / 100) * (S.ls.off / 100)
   ) * 1000;
-  const subPH = subAnnual.total / T;
-  const odPH  = odPerHire.total / T;
   function dl(ours, theirs) {
     const p = Math.round((1 - ours / theirs) * 100);
     if (p > 0) return `<span class="badge bg">${p}% cheaper</span>`;
     if (p < 0) return `<span class="badge by">${Math.abs(p)}% more</span>`;
     return '';
   }
-  // DIY cost calculation
   const diyRecruiterLaborPerHire = S.recHourly * S.recHours;
   const diyAdPerHire             = S.adSpend;
   const diyTotalPerHire          = diyRecruiterLaborPerHire + diyAdPerHire;
@@ -735,19 +730,25 @@ function update() {
   const tradRecruiterFee         = blendedSal * 0.25;
   const retainedFee              = blendedSal * 0.33;
 
-  document.getElementById('benchmarks').innerHTML = `
-    <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Traditional Agency Recruiter (25%)</span><span class="val">${fmtF(tradRecruiterFee)}/hire</span>${dl(subPH, tradRecruiterFee)}</div>
-    <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Retained Search Firm (33%)</span><span class="val">${fmtF(retainedFee)}/hire</span>${dl(subPH, retainedFee)}</div>
-    <div style="border-top:1px solid var(--border);margin:8px 0 4px;padding-top:6px;">
-      <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">DIY Recruiting (total / hire)</span><span class="val">${fmtF(diyTotalPerHire)}</span>${dl(subPH, diyTotalPerHire)}</div>
-      <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Recruiter labor (${S.recHours}h × $${S.recHourly}/hr)</span><span class="val" style="font-weight:400">${fmtF(diyRecruiterLaborPerHire)}</span></div>
-      <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Job ad spend (LinkedIn/Indeed)</span><span class="val" style="font-weight:400">${fmtF(diyAdPerHire)}</span></div>
-      <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Total annual (${T} hires)</span><span class="val" style="font-weight:400">${fmtF(diyTotalAnnual)}</span></div>
-    </div>
-    <div style="border-top:2px solid var(--border);margin-top:6px;padding-top:8px;">
-      <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Replicant · Subscription / hire</span><span class="val" style="color:var(--accent)">${fmtF(subPH)}</span><span class="badge bb">${((subPH/blendedSal)*100).toFixed(1)}% of 1st yr salary</span>${dl(subPH, diyTotalPerHire)}</div>
-      <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Replicant · On-Demand / hire</span><span class="val" style="color:var(--accent)">${fmtF(odPH)}</span><span class="badge by">${((odPH/blendedSal)*100).toFixed(1)}% of 1st yr salary</span>${dl(odPH, diyTotalPerHire)}</div>
-    </div>`;
+  function renderBenchmarks(elId, annualPH, odPH) {
+    document.getElementById(elId).innerHTML =
+      `<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:8px;">Market Benchmarks — cost per hire</div>
+      <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Traditional Agency Recruiter (25%)</span><span class="val">${fmtF(tradRecruiterFee)}/hire</span>${dl(annualPH, tradRecruiterFee)}</div>
+      <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Retained Search Firm (33%)</span><span class="val">${fmtF(retainedFee)}/hire</span>${dl(annualPH, retainedFee)}</div>
+      <div style="border-top:1px solid var(--border);margin:8px 0 4px;padding-top:6px;">
+        <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">DIY Recruiting (total / hire)</span><span class="val">${fmtF(diyTotalPerHire)}</span>${dl(annualPH, diyTotalPerHire)}</div>
+        <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Recruiter labor (${S.recHours}h × $${S.recHourly}/hr)</span><span class="val" style="font-weight:400">${fmtF(diyRecruiterLaborPerHire)}</span></div>
+        <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Job ad spend (LinkedIn/Indeed)</span><span class="val" style="font-weight:400">${fmtF(diyAdPerHire)}</span></div>
+        <div class="row"><span class="lbl" style="padding-left:12px;color:var(--muted);">↳ Total annual (${T} hires)</span><span class="val" style="font-weight:400">${fmtF(diyTotalAnnual)}</span></div>
+      </div>
+      <div style="border-top:2px solid var(--border);margin-top:6px;padding-top:8px;">
+        <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Replicant · Annual / hire</span><span class="val" style="color:var(--accent)">${fmtF(annualPH)}</span><span class="badge bb">${((annualPH/blendedSal)*100).toFixed(1)}% of 1st yr salary</span>${dl(annualPH, diyTotalPerHire)}</div>
+        <div class="row"><span class="lbl" style="font-weight:700;color:var(--text)">Replicant · On-Demand / hire</span><span class="val" style="color:var(--accent)">${fmtF(odPH)}</span><span class="badge by">${((odPH/blendedSal)*100).toFixed(1)}% of 1st yr salary</span>${dl(odPH, diyTotalPerHire)}</div>
+      </div>`;
+  }
+
+  renderBenchmarks('benchmarksSO',  soAnnual.total / T,    soOD.total / T);
+  renderBenchmarks('benchmarksMix', subAnnual.total / T,   odPerHire.total / T);
 
   // ── Mix summary ──
   const mixRows = [
