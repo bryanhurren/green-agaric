@@ -740,8 +740,9 @@ function update() {
         const totalLabel = sc.isBundleNote
           ? `<span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">3-role package · ${fmtF(sc.acv/12)}/mo equiv.</div>`
           : `<span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${fmtF(sc.acv / 12)}/mo</div>`;
+        const pfPct = sc.acv > 0 ? Math.round(sc.pfeeTotal / sc.acv * 100) : 0;
         const pfLabel = sc.pfeeMonthly > 0
-          ? `${fmtF(sc.pfeeTotal)}<div style="font-size:0.7rem;color:var(--muted);">${fmtF(sc.pfeeMonthly)}/mo</div>`
+          ? `${fmtF(sc.pfeeTotal)}<div style="font-size:0.7rem;color:var(--muted);">${fmtF(sc.pfeeMonthly)}/mo · ${pfPct}% of total</div>`
           : '—';
         const bundleStruck = sc.isBundleNote && T > 3;
         return `<tr class="${sc.hl ? 'hl' : ''}" style="${bundleStruck ? 'opacity:0.45;text-decoration:line-through;' : ''}">
