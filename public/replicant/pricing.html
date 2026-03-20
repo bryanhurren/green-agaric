@@ -170,8 +170,22 @@
 
 <div class="page">
 
-  <!-- ══ ROW 1: Volume + Pricing Rates ══ -->
-  <div class="row2 mb">
+  <!-- ══ Service Mode Toggle ══ -->
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:12px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;">
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);">Account Service Mode</div>
+    <div class="tg" id="svcModeTg" style="max-width:360px;">
+      <button class="active" onclick="setSvcMode('screen')">Screen Only</button>
+      <button onclick="setSvcMode('fullservice')">Full Service (Source + Screen)</button>
+    </div>
+    <div id="fullServiceControls" style="display:none;align-items:center;gap:12px;flex:1;">
+      <div style="font-size:0.8rem;color:var(--muted);">Full-service fee:</div>
+      <input type="range" id="fullServicePct" min="10" max="100" value="60" step="5" oninput="update()" style="flex:1;max-width:180px;">
+      <span class="sv" id="fullServicePctVal" style="min-width:130px;" data-tip="Full service charges this % of the fully-loaded DIY recruiter cost per role (recruiter labor + ad spend). E.g. 60% means we charge 60% of what it would cost to hire a recruiter to do the same work.">60% of DIY cost/role</span>
+    </div>
+  </div>
+
+  <!-- ══ ROW 1: Volume + Premium Sliders + Salary Rates ══ -->
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:16px;">
 
     <!-- Volume -->
     <div class="card">
@@ -213,24 +227,10 @@
       </div>
     </div>
 
-    <!-- Pricing Rates -->
+    <!-- Premium Sliders -->
     <div class="card">
-      <div class="slbl">Pricing Rates</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;">
-        <div>
-          <div class="field-label">Screen-only: % of 1st yr salary</div>
-          <div class="sl">
-            <input type="range" id="screenPct" min="0.5" max="15" value="1" step="0.5" oninput="update()">
-            <span class="sv" id="screenPctVal">1%</span>
-          </div>
-        </div>
-        <div>
-          <div class="field-label">Sourced: % of 1st yr salary</div>
-          <div class="sl">
-            <input type="range" id="sourcePct" min="1" max="25" value="10" step="0.5" oninput="update()">
-            <span class="sv" id="sourcePctVal">10%</span>
-          </div>
-        </div>
+      <div class="slbl">Commitment Premiums</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
         <div>
           <div class="field-label">Monthly premium vs annual</div>
           <div class="sl">
@@ -243,6 +243,34 @@
           <div class="sl">
             <input type="range" id="odPremium" min="0" max="100" value="50" step="5" oninput="update()">
             <span class="sv" id="odPremiumVal" data-tip="On-demand carries a higher premium than monthly — no platform commitment, pay only for months used. Typically 40–60% over annual.">+50%</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">3-role bundle premium vs annual</div>
+          <div class="sl">
+            <input type="range" id="bundlePremium" min="0" max="60" value="20" step="5" oninput="update()">
+            <span class="sv" id="bundlePremiumVal" data-tip="A 3-role bundle is a one-time package — no ongoing commitment. Priced at a premium over the annual per-role rate.">+20%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salary % Rates -->
+    <div class="card">
+      <div class="slbl">Salary-Based Rates</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <div class="field-label">Screen-only: % of 1st yr salary</div>
+          <div class="sl">
+            <input type="range" id="screenPct" min="0.5" max="15" value="1" step="0.5" oninput="update()">
+            <span class="sv" id="screenPctVal">1%</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Sourced: % of 1st yr salary</div>
+          <div class="sl">
+            <input type="range" id="sourcePct" min="1" max="25" value="10" step="0.5" oninput="update()">
+            <span class="sv" id="sourcePctVal">10%</span>
           </div>
         </div>
       </div>
@@ -397,8 +425,8 @@
   <div style="display:flex;flex-direction:column;gap:16px;">
 
     <div class="result-card">
-      <h2>Commitment Scenarios — Screen Only</h2>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;">All roles screened. No sourcing. Platform + screen fees only.</div>
+      <h2 id="tableTitle1">Commitment Scenarios — Screen Only</h2>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;" id="tableSubtitle1">All roles screened. No sourcing. Platform + screen fees only.</div>
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;">
         <div>
           <table class="stbl" id="screenOnlyTbl"></table>
@@ -455,6 +483,7 @@ const S = {
   sourcePct: 10,
   monthlyPremium: 25,
   odPremium: 50,
+  bundlePremium: 20,
   volThresh: 24,
   volDiscount: 20,
   pfStandard: 100,
@@ -464,6 +493,8 @@ const S = {
   recHourly: 60,
   recHours: 40,
   adSpend: 300,
+  serviceMode: 'screen',
+  fullServicePct: 60,
   hs: { pct: 30, src: 0, salUS: 110, salOff: 40, off: 0 },
   ls: { pct: 70, src: 0, salUS: 55,  salOff: 20, off: 0 },
   guarantee: 'standard',
@@ -476,6 +507,12 @@ const R_MULT = { standard: 1.0, rush: 1.25, superrush: 1.5 };
 
 function setGuar(v) { S.guarantee = v; act('guarTg', ['standard','extended','premium'].indexOf(v)); update(); }
 function setRush(v) { S.rush = v; act('rushTg', ['standard','rush','superrush'].indexOf(v)); update(); }
+function setSvcMode(v) {
+  S.serviceMode = v;
+  act('svcModeTg', ['screen','fullservice'].indexOf(v));
+  document.getElementById('fullServiceControls').style.display = v === 'fullservice' ? 'flex' : 'none';
+  update();
+}
 function act(id, i) { document.getElementById(id).querySelectorAll('button').forEach((b,j) => b.classList.toggle('active', i===j)); }
 function syncJobsFromSlider() { document.getElementById('totalJobsNum').value = document.getElementById('totalJobs').value; update(); }
 function syncJobsFromNum() { const v = Math.max(1, parseInt(document.getElementById('totalJobsNum').value) || 1); document.getElementById('totalJobs').value = Math.min(v, 1000); update(); }
@@ -491,10 +528,22 @@ function cph({ mode, salaryK, gm, rm, cm, vm }) {
 
 // ── Total fee for a given commit multiplier, vol mult, and platform months ─
 // screenOnly: if true, forces all jobs through screen mode (ignores src %)
+// In full-service mode, fee per role = fullServicePct% × DIY cost per hire × cm × vm
 function calcTotal(cm, vm, platformMonths, platformDiscountMult, screenOnly) {
   const T = S.totalJobs;
   const gm = G_MULT[S.guarantee];
   const rm = R_MULT[S.rush];
+
+  // Full service mode: flat fee per role based on % of loaded recruiter cost
+  if (S.serviceMode === 'fullservice') {
+    const diyPerRole = S.recHourly * S.recHours + S.adSpend;
+    const feePerRole = diyPerRole * (S.fullServicePct / 100) * cm * vm * gm * rm;
+    const recruit = feePerRole * T;
+    const isEnterprise = T >= S.pfThreshold;
+    const pfeeMonthly = (isEnterprise ? S.pfEnterprise : S.pfStandard) * platformDiscountMult;
+    const pfeeTotal = pfeeMonthly * platformMonths;
+    return { screenFees: recruit, sourceFees: 0, recruit, pfeeTotal, pfeeMonthly, total: recruit + pfeeTotal, isEnterprise };
+  }
 
   let screenFees = 0;
   let sourceFees = 0;
@@ -545,6 +594,8 @@ function update() {
   S.sourcePct        = parseFloat(document.getElementById('sourcePct').value);
   S.monthlyPremium   = parseInt(document.getElementById('monthlyPremium').value);
   S.odPremium        = parseInt(document.getElementById('odPremium').value);
+  S.bundlePremium    = parseInt(document.getElementById('bundlePremium').value);
+  S.fullServicePct   = parseInt(document.getElementById('fullServicePct').value);
   S.volThresh        = parseInt(document.getElementById('volThresh').value);
   S.volDiscount      = parseInt(document.getElementById('volDiscount').value);
   S.pfStandard       = parseInt(document.getElementById('pfStandard').value);
@@ -589,8 +640,10 @@ function update() {
   document.getElementById('qualCountVal').textContent    = qualPerJob;
   document.getElementById('screenPctVal').textContent    = S.screenPct + '%';
   document.getElementById('sourcePctVal').textContent    = S.sourcePct + '%';
-  document.getElementById('monthlyPremiumVal').textContent = '+' + S.monthlyPremium + '%';
-  document.getElementById('odPremiumVal').textContent      = '+' + S.odPremium + '%';
+  document.getElementById('monthlyPremiumVal').textContent  = '+' + S.monthlyPremium + '%';
+  document.getElementById('odPremiumVal').textContent       = '+' + S.odPremium + '%';
+  document.getElementById('bundlePremiumVal').textContent   = '+' + S.bundlePremium + '%';
+  document.getElementById('fullServicePctVal').textContent  = S.fullServicePct + '% of DIY cost/role';
   document.getElementById('volThreshVal').textContent    = S.volThresh + ' jobs/yr';
   document.getElementById('volDiscountVal').textContent  = S.volDiscount + '%';
   document.getElementById('pfStandardVal').textContent   = '$' + S.pfStandard + '/mo';
@@ -624,13 +677,28 @@ function update() {
 
   // Platform tier badge
   document.getElementById('platformTierBadge').innerHTML = isEnterprise
-    ? `<span class="badge bp">Enterprise (${T} jobs ≥ ${S.pfThreshold})</span>`
+    ? `<span class="badge bp">Higher tier (${T} jobs ≥ ${S.pfThreshold})</span>`
     : `<span class="badge bb">Standard (${T} jobs < ${S.pfThreshold})</span>`;
 
+  // Table titles / subtitles based on service mode
+  const isFullService = S.serviceMode === 'fullservice';
+  const diyPerRole = S.recHourly * S.recHours + S.adSpend;
+  const feePerRoleFS = diyPerRole * (S.fullServicePct / 100);
+  document.getElementById('tableTitle1').textContent = isFullService
+    ? 'Commitment Scenarios — Full Service'
+    : 'Commitment Scenarios — Screen Only';
+  document.getElementById('tableSubtitle1').textContent = isFullService
+    ? `Full service: ${S.fullServicePct}% of DIY recruiter cost = ${fmtF(feePerRoleFS)}/role flat fee. Covers all recruiting activities.`
+    : 'All roles screened. No sourcing. Platform + screen fees only.';
+
   // ── Calc scenarios ──
+  const bundleMult = 1 + S.bundlePremium / 100;
+  // Bundle: 3-role package, platform billed for odMonths (same logic as OD), no vol discount
+  const soBundle   = calcTotal(bundleMult, 1.0, odMonths, 1.0, true);
+  const subBundle  = calcTotal(bundleMult, 1.0, odMonths, 1.0, false);
   // Screen-only variants (src % forced to 0)
-  const soAnnual  = calcTotal(1.0,         volMult, 12,         1.0, true);
-  const soMonthly = calcTotal(monthlyMult, volMult, 12,         1.0, true);
+  const soAnnual  = calcTotal(1.0,         volMult, 12,       1.0, true);
+  const soMonthly = calcTotal(monthlyMult, volMult, 12,       1.0, true);
   const soOD      = calcTotal(odMult,      1.0,     odMonths, 1.0, true);
   // Mixed variants (uses configured src %)
   const subAnnual  = calcTotal(1.0,         volMult, 12,       1.0, false);
@@ -660,7 +728,7 @@ function update() {
         <th class="r">Platform Fee</th>
         <th class="r">Screen Fees</th>
         ${hasSourcing ? `<th class="r">Sourced Fees</th>` : ''}
-        <th class="r">Annual Total</th>
+        <th class="r">Total</th>
         <th class="r">Avg / Hire</th>
         <th class="r">Implied / Qual Cand.</th>
         <th></th>
@@ -670,12 +738,15 @@ function update() {
         const pfeePctStr = sc.pfee > 0
           ? `<div style="font-size:0.7rem;font-weight:600;color:${pfeePct > 30 ? '#dc2626' : 'var(--muted)'};">${pfeePct.toFixed(0)}% of total</div>`
           : '';
+        const totalLabel = sc.isBundleNote
+          ? `<span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">3-role package · ${fmtF(sc.acv/12)}/mo equiv.</div>`
+          : `<span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${fmtF(sc.acv / 12)}/mo</div>`;
         return `<tr class="${sc.hl ? 'hl' : ''}">
           <td><strong>${sc.name}</strong><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;">${pills(sc.pills)}</div></td>
           <td class="r">${sc.pfee > 0 ? sc.pfeeLabel + pfeePctStr : '—'}</td>
           <td class="r">${fmtF(sc.screenFees)}</td>
           ${hasSourcing ? `<td class="r"><span style="color:#059669;font-weight:700;">${sc.sourceFees > 0 ? fmtF(sc.sourceFees) + ' *' : '—'}</span></td>` : ''}
-          <td class="r"><span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${fmtF(sc.acv / 12)}/mo</div></td>
+          <td class="r">${totalLabel}</td>
           <td class="r">${fmtF(sc.perHire)}</td>
           <td class="r"><strong>${fmtF(sc.cpq)}</strong></td>
           <td><span class="badge ${sc.badge}">${sc.btxt}</span></td>
@@ -683,7 +754,7 @@ function update() {
       }).join('') + '</tbody>';
   }
 
-  function buildScenarios(annual, monthly, od, labelSuffix) {
+  function buildScenarios(annual, monthly, od, bundle, labelSuffix) {
     const commitPills = (extra) => [
       ...extra,
       ...(volMult < 1 ? [[`${S.volDiscount}% vol discount`, 'bg']] : []),
@@ -692,6 +763,11 @@ function update() {
       ...(S.guarantee !== 'standard' ? [[S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']] : []),
       ...(S.rush !== 'standard' ? [[S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']] : []),
     ];
+    // Bundle total is for 3 roles, scale from T
+    const bundleTotal3 = T > 0 ? bundle.total * 3 / T : 0;
+    const bundleRecruit3 = T > 0 ? bundle.recruit * 3 / T : 0;
+    const bundlePfee3 = T > 0 ? bundle.pfeeTotal * 3 / T : 0;
+    const bundleQual3 = qualPerJob * 3;
     return [
       {
         name: `Annual Commit${labelSuffix}`,
@@ -717,11 +793,20 @@ function update() {
         pfee: od.pfeeTotal, screenFees: od.screenFees, sourceFees: od.sourceFees,
         badge: 'by', btxt: `+${S.odPremium}% vs annual`, hl: false,
       },
+      {
+        name: `3-Role Bundle${labelSuffix}`,
+        pills: [['3 roles only', 'bm'], [`+${S.bundlePremium}% vs annual`, 'by'], ...(S.guarantee !== 'standard' ? [[S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']] : []), ...(S.rush !== 'standard' ? [[S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']] : [])],
+        acv: bundleTotal3, perHire: bundleTotal3 / 3, cpq: bundleQual3 > 0 ? bundleRecruit3 / bundleQual3 : 0,
+        pfeeLabel: `${fmtF(bundlePfee3)} (${odMonths}mo)`,
+        pfee: bundlePfee3, screenFees: T > 0 ? bundle.screenFees * 3 / T : 0, sourceFees: T > 0 ? bundle.sourceFees * 3 / T : 0,
+        badge: 'bm', btxt: 'Entry package', hl: false,
+        isBundleNote: true,
+      },
     ];
   }
 
-  const screenOnlyScenarios = buildScenarios(soAnnual, soMonthly, soOD, '');
-  const mixedScenarios      = buildScenarios(subAnnual, subMonthly, odPerHire, '');
+  const screenOnlyScenarios = buildScenarios(soAnnual, soMonthly, soOD, soBundle, '');
+  const mixedScenarios      = buildScenarios(subAnnual, subMonthly, odPerHire, subBundle, '');
 
   renderTable('screenOnlyTbl', screenOnlyScenarios);
   renderTable('mixedTbl', mixedScenarios);
@@ -831,6 +916,9 @@ function applySnapshot(snap) {
   setSlider('sourcePct',     snap.sourcePct);
   setSlider('monthlyPremium',snap.monthlyPremium);
   setSlider('odPremium',     snap.odPremium);
+  setSlider('bundlePremium', snap.bundlePremium || 20);
+  setSlider('fullServicePct',snap.fullServicePct || 60);
+  if (snap.serviceMode) setSvcMode(snap.serviceMode);
   setSlider('volThresh',     snap.volThresh);
   setSlider('volDiscount',   snap.volDiscount);
   setSlider('pfStandard',    snap.pfStandard);
