@@ -529,8 +529,8 @@ function cph({ mode, salaryK, gm, rm, cm, vm }) {
 // ── Total fee for a given commit multiplier, vol mult ──────────────────────
 // screenOnly: if true, forces all jobs through screen mode (ignores src %)
 // platformMonths: number of months to bill platform fee (12 for annual/monthly, odMonths for OD/bundle)
-function calcTotal(cm, vm, screenOnly, platformMonths) {
-  const T = S.totalJobs;
+function calcTotal(cm, vm, screenOnly, platformMonths, overrideT) {
+  const T = overrideT !== undefined ? overrideT : S.totalJobs;
   const gm = G_MULT[S.guarantee];
   const rm = R_MULT[S.rush];
 
@@ -701,9 +701,9 @@ function update() {
 
   // ── Calc scenarios ──
   const bundleMult = 1 + S.bundlePremium / 100;
-  // Bundle: 3-role package, no vol discount, platform billed for odMonths
-  const soBundle   = calcTotal(bundleMult, 1.0,     true,  odMonths);
-  const subBundle  = calcTotal(bundleMult, 1.0,     false, odMonths);
+  // Bundle: always 3 roles, no vol discount, platform billed for odMonths
+  const soBundle   = calcTotal(bundleMult, 1.0,     true,  odMonths, 3);
+  const subBundle  = calcTotal(bundleMult, 1.0,     false, odMonths, 3);
   // Screen-only variants (src % forced to 0)
   const soAnnual  = calcTotal(1.0,         volMult, true,  12);
   const soMonthly = calcTotal(monthlyMult, volMult, true,  12);
@@ -764,8 +764,6 @@ function update() {
       ...(S.guarantee !== 'standard' ? [[S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']] : []),
       ...(S.rush !== 'standard' ? [[S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']] : []),
     ];
-    // Bundle totals scaled to 3 roles
-    const s3 = T > 0 ? 3 / T : 0;
     const bundleQual3 = qualPerJob * 3;
     return [
       {
@@ -789,11 +787,11 @@ function update() {
       {
         name: `3-Role Bundle${labelSuffix}`,
         pills: [['3 roles only', 'bm'], [`+${S.bundlePremium}% vs annual`, 'by'], ...(S.guarantee !== 'standard' ? [[S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']] : []), ...(S.rush !== 'standard' ? [[S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']] : [])],
-        acv: bundle.total * s3, perHire: bundle.total * s3 / 3,
-        cpq: bundleQual3 > 0 ? bundle.recruit * s3 / bundleQual3 : 0,
-        screenFees: bundle.screenFees * s3, sourceFees: bundle.sourceFees * s3,
-        fullServiceFees: bundle.fullServiceFees * s3,
-        pfeeTotal: bundle.pfeeTotal * s3, pfeeMonthly: bundle.pfeeMonthly,
+        acv: bundle.total, perHire: bundle.total / 3,
+        cpq: bundleQual3 > 0 ? bundle.recruit / bundleQual3 : 0,
+        screenFees: bundle.screenFees, sourceFees: bundle.sourceFees,
+        fullServiceFees: bundle.fullServiceFees,
+        pfeeTotal: bundle.pfeeTotal, pfeeMonthly: bundle.pfeeMonthly,
         badge: 'bm', btxt: 'Entry package', hl: false,
         isBundleNote: true,
       },
