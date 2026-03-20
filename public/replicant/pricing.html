@@ -794,14 +794,6 @@ function update() {
         badge: 'bb', btxt: 'Flexible', hl: false,
       },
       {
-        name: `On-Demand${labelSuffix}`,
-        pills: commitPills([[`+${S.odPremium}% vs annual`, 'by'], [`Platform: ${odMonths}mo`, 'bm']]),
-        acv: od.total, perHire: od.total / T, cpq: od.recruit / totalQual,
-        pfeeLabel: `${fmtF(od.pfeeTotal)} (${odMonths}mo)`,
-        pfee: od.pfeeTotal, screenFees: od.screenFees, sourceFees: od.sourceFees,
-        badge: 'by', btxt: `+${S.odPremium}% vs annual`, hl: false,
-      },
-      {
         name: `3-Role Bundle${labelSuffix}`,
         pills: [['3 roles only', 'bm'], [`+${S.bundlePremium}% vs annual`, 'by'], ...(S.guarantee !== 'standard' ? [[S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']] : []), ...(S.rush !== 'standard' ? [[S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']] : [])],
         acv: bundleTotal3, perHire: bundleTotal3 / 3, cpq: bundleQual3 > 0 ? bundleRecruit3 / bundleQual3 : 0,
@@ -809,6 +801,14 @@ function update() {
         pfee: bundlePfee3, screenFees: T > 0 ? bundle.screenFees * 3 / T : 0, sourceFees: T > 0 ? bundle.sourceFees * 3 / T : 0,
         badge: 'bm', btxt: 'Entry package', hl: false,
         isBundleNote: true,
+      },
+      {
+        name: `On-Demand${labelSuffix}`,
+        pills: commitPills([[`+${S.odPremium}% vs annual`, 'by'], [`Platform: ${odMonths}mo`, 'bm']]),
+        acv: od.total, perHire: od.total / T, cpq: od.recruit / totalQual,
+        pfeeLabel: `${fmtF(od.pfeeTotal)} (${odMonths}mo)`,
+        pfee: od.pfeeTotal, screenFees: od.screenFees, sourceFees: od.sourceFees,
+        badge: 'by', btxt: `+${S.odPremium}% vs annual`, hl: false,
       },
     ];
   }
