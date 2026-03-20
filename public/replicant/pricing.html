@@ -750,7 +750,7 @@ function update() {
           <td class="r"><span style="color:#059669;font-weight:700;">${sc.sourceFees > 0 ? fmtF(sc.sourceFees) : '—'}</span></td>
           <td class="r">${pfLabel}</td>
           <td class="r">${totalLabel}</td>
-          <td class="r">${fmtF(sc.perHire)}${sc.isBundleNote ? '<div style="font-size:0.7rem;color:var(--muted);">÷ 3 roles</div>' : ''}</td>
+          <td class="r">${fmtF(sc.perHire)}${sc.isBundleNote ? `<div style="font-size:0.7rem;color:var(--muted);">pkg ÷ ${Math.min(T,3)}</div>` : ''}</td>
           <td class="r"><strong>${fmtF(sc.cpq)}</strong></td>
           <td><span class="badge ${sc.badge}">${sc.btxt}</span></td>
         </tr>`;
@@ -788,7 +788,7 @@ function update() {
       {
         name: `3-Role Bundle${labelSuffix}`,
         pills: [['3 roles only', 'bm'], [`+${S.bundlePremium}% vs annual`, 'by'], ...(S.guarantee !== 'standard' ? [[S.guarantee === 'extended' ? '90d guarantee +20%' : '1yr guarantee +40%', 'bb']] : []), ...(S.rush !== 'standard' ? [[S.rush === 'rush' ? 'Rush +25%' : 'Super Rush +50%', 'by']] : [])],
-        acv: bundle.total, perHire: bundle.total / 3,
+        acv: bundle.total, perHire: bundle.total / Math.min(T, 3),
         cpq: bundleQual3 > 0 ? bundle.recruit / bundleQual3 : 0,
         screenFees: bundle.screenFees, sourceFees: bundle.sourceFees,
         fullServiceFees: bundle.fullServiceFees,
