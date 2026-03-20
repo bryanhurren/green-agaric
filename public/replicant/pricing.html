@@ -657,6 +657,7 @@ function update() {
     ? `<span class="badge bg">${S.pfDiscount}% discount active · $${Math.round(pfEffective)}/mo</span>`
     : `<span class="badge bb">Standard · $${S.pfMonthly}/mo</span>`;
   const odMonths = Math.min(12, Math.ceil(T / S.hiresPerMonth));
+  const bundleOdMonths = Math.min(12, Math.ceil(3 / S.hiresPerMonth));
   document.getElementById('hiresPerMonthVal').textContent = `${S.hiresPerMonth}/mo → ${odMonths}mo on-demand`;
   document.getElementById('recHourlyVal').textContent    = '$' + S.recHourly + '/hr';
   document.getElementById('recHoursVal').textContent     = S.recHours + ' hrs';
@@ -701,9 +702,9 @@ function update() {
 
   // ── Calc scenarios ──
   const bundleMult = 1 + S.bundlePremium / 100;
-  // Bundle: always 3 roles, no vol discount, platform billed for odMonths
-  const soBundle   = calcTotal(bundleMult, 1.0,     true,  odMonths, 3);
-  const subBundle  = calcTotal(bundleMult, 1.0,     false, odMonths, 3);
+  // Bundle: always 3 roles, no vol discount, platform billed for bundleOdMonths
+  const soBundle   = calcTotal(bundleMult, 1.0,     true,  bundleOdMonths, 3);
+  const subBundle  = calcTotal(bundleMult, 1.0,     false, bundleOdMonths, 3);
   // Screen-only variants (src % forced to 0)
   const soAnnual  = calcTotal(1.0,         volMult, true,  12);
   const soMonthly = calcTotal(monthlyMult, volMult, true,  12);
