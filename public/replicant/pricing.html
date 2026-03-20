@@ -742,8 +742,9 @@ function update() {
         const pfLabel = sc.pfeeMonthly > 0
           ? `${fmtF(sc.pfeeTotal)}<div style="font-size:0.7rem;color:var(--muted);">${fmtF(sc.pfeeMonthly)}/mo</div>`
           : '—';
-        return `<tr class="${sc.hl ? 'hl' : ''}">
-          <td><strong>${sc.name}</strong><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;">${pills(sc.pills)}</div></td>
+        const bundleStruck = sc.isBundleNote && T > 3;
+        return `<tr class="${sc.hl ? 'hl' : ''}" style="${bundleStruck ? 'opacity:0.45;text-decoration:line-through;' : ''}">
+          <td><strong>${sc.name}</strong>${bundleStruck ? '<div style="font-size:0.7rem;color:var(--muted);text-decoration:none;margin-top:3px;">Not applicable — hiring more than 3 roles</div>' : ''}<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;">${pills(sc.pills)}</div></td>
           ${hasFullService ? `<td class="r"><span style="color:#7c3aed;font-weight:700;">${sc.fullServiceFees > 0 ? fmtF(sc.fullServiceFees) : '—'}</span></td>` : ''}
           <td class="r">${sc.screenFees > 0 ? fmtF(sc.screenFees) : '—'}</td>
           <td class="r"><span style="color:#059669;font-weight:700;">${sc.sourceFees > 0 ? fmtF(sc.sourceFees) : '—'}</span></td>
