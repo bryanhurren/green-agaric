@@ -534,8 +534,8 @@ function calcTotal(cm, vm, screenOnly, platformMonths, overrideT) {
   const gm = G_MULT[S.guarantee];
   const rm = R_MULT[S.rush];
 
-  // Platform fee — applies always, discount above threshold
-  const pfRate = T >= S.pfDiscountThresh ? S.pfMonthly * (1 - S.pfDiscount / 100) : S.pfMonthly;
+  // Platform fee — discount based on real account job volume, not bundle override
+  const pfRate = S.totalJobs >= S.pfDiscountThresh ? S.pfMonthly * (1 - S.pfDiscount / 100) : S.pfMonthly;
   const pfeeTotal = pfRate * platformMonths;
 
   // Full service: flat fee per role (% of trad agency fee) + separate screen/source fees still apply
@@ -750,7 +750,7 @@ function update() {
           <td class="r"><span style="color:#059669;font-weight:700;">${sc.sourceFees > 0 ? fmtF(sc.sourceFees) : '—'}</span></td>
           <td class="r">${pfLabel}</td>
           <td class="r">${totalLabel}</td>
-          <td class="r">${fmtF(sc.perHire)}</td>
+          <td class="r">${fmtF(sc.perHire)}${sc.isBundleNote ? '<div style="font-size:0.7rem;color:var(--muted);">÷ 3 roles</div>' : ''}</td>
           <td class="r"><strong>${fmtF(sc.cpq)}</strong></td>
           <td><span class="badge ${sc.badge}">${sc.btxt}</span></td>
         </tr>`;
