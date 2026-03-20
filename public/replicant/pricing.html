@@ -18,6 +18,9 @@
     --hs-light: #ede9fe;
     --ls: #0891b2;
     --ls-light: #e0f2fe;
+    --be-bg: #f0fdf4;
+    --be-border: #bbf7d0;
+    --be-text: #166534;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
@@ -142,6 +145,21 @@
   .divider-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); background: var(--bg); padding: 0 8px; position: relative; text-align: center; margin: 10px 0; }
   .divider-label::before { content:''; position:absolute; left:0; right:0; top:50%; height:1px; background:var(--border); z-index:0; }
   .divider-label span { position:relative; z-index:1; }
+
+  /* ── Blended rate bar ── */
+  .blended-bar { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding: 10px 16px; background: var(--subtle); border-radius: 8px; margin-bottom: 14px; font-size: 0.8rem; color: var(--text); }
+  .blended-bar .bl-item { display: flex; align-items: center; gap: 6px; }
+  .blended-bar .bl-label { color: var(--muted); }
+  .blended-bar .bl-val { font-weight: 700; color: var(--accent); }
+
+  /* ── Snapshot banner ── */
+  .snap-banner {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    background: #fef3c7; border: 1px solid #fcd34d; color: #92400e;
+    padding: 10px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+    z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transition: opacity 0.4s;
+  }
 </style>
 </head>
 <body>
@@ -165,22 +183,29 @@
     <button class="cfg-btn save" onclick="saveConfig()">Save</button>
     <button class="cfg-btn saveas" onclick="saveAsConfig()">Save As</button>
     <button class="cfg-btn del" onclick="deleteConfig()">Delete</button>
+    <button class="cfg-btn saveas" onclick="exportConfigs()">Export</button>
+    <button class="cfg-btn saveas" onclick="importConfigs()">Import</button>
   </div>
 </header>
 
 <div class="page">
 
   <!-- ══ Service Mode Toggle ══ -->
-  <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:12px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;">
-    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);">Account Service Mode</div>
-    <div class="tg" id="svcModeTg" style="max-width:360px;">
-      <button class="active" onclick="setSvcMode('screen')">Screen Only</button>
-      <button onclick="setSvcMode('fullservice')">Full Service</button>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;padding:12px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);">Account Service Mode</div>
+      <div class="tg" id="svcModeTg" style="max-width:360px;">
+        <button class="active" onclick="setSvcMode('screen')">Screen Only</button>
+        <button onclick="setSvcMode('fullservice')">Full Service</button>
+      </div>
+      <div id="fullServiceControls" style="display:none;align-items:center;gap:12px;flex:1;">
+        <div style="font-size:0.8rem;color:var(--muted);">% of Traditional Agency Recruiter fee:</div>
+        <input type="range" id="fullServicePct" min="10" max="100" value="60" step="5" oninput="debouncedUpdate()" style="flex:1;max-width:180px;">
+        <span class="sv" id="fullServicePctVal" style="min-width:160px;" data-tip="Full service charges this % of what a traditional agency recruiter (25% of 1st yr salary) would charge per role. E.g. 60% means we charge 60% of the agency fee — still a significant discount.">60% of agency fee/role</span>
+      </div>
     </div>
-    <div id="fullServiceControls" style="display:none;align-items:center;gap:12px;flex:1;">
-      <div style="font-size:0.8rem;color:var(--muted);">% of Traditional Agency Recruiter fee:</div>
-      <input type="range" id="fullServicePct" min="10" max="100" value="60" step="5" oninput="update()" style="flex:1;max-width:180px;">
-      <span class="sv" id="fullServicePctVal" style="min-width:160px;" data-tip="Full service charges this % of what a traditional agency recruiter (25% of 1st yr salary) would charge per role. E.g. 60% means we charge 60% of the agency fee — still a significant discount.">60% of agency fee/role</span>
+    <div id="fullServiceCallout" style="display:none;padding:8px 12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:7px;font-size:0.78rem;color:#92400e;font-weight:600;">
+      Full Service fee is charged per role in addition to screen and sourced fees — not a replacement.
     </div>
   </div>
 
@@ -201,15 +226,15 @@
         <div>
           <div class="field-label">Avg. applicants / job</div>
           <div class="sl">
-            <input type="range" id="appPerJob" min="10" max="300" value="60" step="10" oninput="update()">
+            <input type="range" id="appPerJob" min="30" max="300" value="60" step="10" oninput="debouncedUpdate()">
             <span class="sv" id="appPerJobVal">60</span>
           </div>
         </div>
         <div>
           <div class="field-label">Qual. rate (% of applicants who qualify)</div>
           <div class="sl">
-            <input type="range" id="qualRate" min="1" max="40" value="10" step="1" oninput="update()">
-            <span class="sv" id="qualRateVal">10%</span>
+            <input type="range" id="qualRate" min="1" max="40" value="10" step="1" oninput="debouncedUpdate()">
+            <span class="sv" id="qualRateVal" data-tip="% of applicants who score 80+ in Replicant's AI screening. Default 10% means 1 in 10 applicants qualifies.">10%</span>
           </div>
         </div>
         <div>
@@ -220,7 +245,7 @@
         <div>
           <div class="field-label">Avg hires / month (for on-demand)</div>
           <div class="sl">
-            <input type="range" id="hiresPerMonth" min="1" max="60" value="2" step="1" oninput="update()">
+            <input type="range" id="hiresPerMonth" min="1" max="60" value="2" step="1" oninput="debouncedUpdate()">
             <span class="sv" id="hiresPerMonthVal">2/mo → 12 months</span>
           </div>
         </div>
@@ -230,25 +255,26 @@
     <!-- Premium Sliders -->
     <div class="card">
       <div class="slbl">Commitment Premiums</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:8px;">Markup over the annual baseline rate — not % of salary.</div>
       <div style="display:flex;flex-direction:column;gap:14px;">
         <div>
           <div class="field-label">Monthly premium vs annual</div>
           <div class="sl">
-            <input type="range" id="monthlyPremium" min="0" max="60" value="25" step="5" oninput="update()">
+            <input type="range" id="monthlyPremium" min="0" max="60" value="25" step="5" oninput="debouncedUpdate()">
             <span class="sv" id="monthlyPremiumVal" data-tip="Monthly billing carries a premium over annual commit — typically 20–30% in B2B SaaS. Annual is the baseline rate.">+25%</span>
           </div>
         </div>
         <div>
           <div class="field-label">On-demand premium vs annual</div>
           <div class="sl">
-            <input type="range" id="odPremium" min="0" max="300" value="50" step="5" oninput="update()">
+            <input type="range" id="odPremium" min="0" max="300" value="50" step="5" oninput="debouncedUpdate()">
             <span class="sv" id="odPremiumVal" data-tip="On-demand carries a higher premium than monthly — no platform commitment, pay only for months used. Typically 40–60% over annual.">+50%</span>
           </div>
         </div>
         <div>
           <div class="field-label">3-role bundle premium vs annual</div>
           <div class="sl">
-            <input type="range" id="bundlePremium" min="0" max="60" value="20" step="5" oninput="update()">
+            <input type="range" id="bundlePremium" min="0" max="60" value="20" step="5" oninput="debouncedUpdate()">
             <span class="sv" id="bundlePremiumVal" data-tip="A 3-role bundle is a one-time package — no ongoing commitment. Priced at a premium over the annual per-role rate.">+20%</span>
           </div>
         </div>
@@ -262,14 +288,14 @@
         <div>
           <div class="field-label">Screen-only: % of 1st yr salary</div>
           <div class="sl">
-            <input type="range" id="screenPct" min="0.5" max="15" value="1" step="0.5" oninput="update()">
+            <input type="range" id="screenPct" min="0.5" max="15" value="1" step="0.5" oninput="debouncedUpdate()">
             <span class="sv" id="screenPctVal">1%</span>
           </div>
         </div>
         <div>
           <div class="field-label">Sourced: % of 1st yr salary</div>
           <div class="sl">
-            <input type="range" id="sourcePct" min="1" max="25" value="10" step="0.5" oninput="update()">
+            <input type="range" id="sourcePct" min="1" max="25" value="10" step="0.5" oninput="debouncedUpdate()">
             <span class="sv" id="sourcePctVal">10%</span>
           </div>
         </div>
@@ -296,23 +322,24 @@
       <div class="seg-body">
         <div>
           <div class="field-label">% of total jobs</div>
-          <div class="sl"><input type="range" id="hs-pct" min="0" max="100" value="30" step="5" oninput="update()"><span class="sv" id="hs-pct-val">30%</span></div>
+          <div class="sl"><input type="range" id="hs-pct" min="0" max="100" value="30" step="5" oninput="debouncedUpdate()"><span class="sv" id="hs-pct-val">30%</span></div>
         </div>
         <div>
           <div class="field-label">% we source (from pool)</div>
-          <div class="sl"><input type="range" id="hs-src" min="0" max="100" value="0" step="5" oninput="update()"><span class="sv" id="hs-src-val">0% · 0 jobs</span></div>
+          <div class="sl"><input type="range" id="hs-src" min="0" max="100" value="0" step="5" oninput="debouncedUpdate()"><span class="sv" id="hs-src-val">0% · 0 jobs</span></div>
+          <div class="note" style="margin-top:2px;">Sourced roles carry placement fee instead of screen fee.</div>
         </div>
         <div>
           <div class="field-label">Avg salary — US</div>
-          <div class="sl"><input type="range" id="hs-sal-us" min="60" max="300" value="110" step="5" oninput="update()"><span class="sv" id="hs-sal-us-val">$110k</span></div>
+          <div class="sl"><input type="range" id="hs-sal-us" min="60" max="300" value="110" step="5" oninput="debouncedUpdate()"><span class="sv" id="hs-sal-us-val">$110k</span></div>
         </div>
         <div>
           <div class="field-label">Avg salary — Offshore</div>
-          <div class="sl"><input type="range" id="hs-sal-off" min="15" max="120" value="40" step="5" oninput="update()"><span class="sv" id="hs-sal-off-val">$40k</span></div>
+          <div class="sl"><input type="range" id="hs-sal-off" min="15" max="120" value="40" step="5" oninput="debouncedUpdate()"><span class="sv" id="hs-sal-off-val">$40k</span></div>
         </div>
         <div style="grid-column:span 2;">
           <div class="field-label">% offshored</div>
-          <div class="sl"><input type="range" id="hs-off" min="0" max="100" value="0" step="5" oninput="update()"><span class="sv" id="hs-off-val">0% · 0 jobs</span></div>
+          <div class="sl"><input type="range" id="hs-off" min="0" max="100" value="0" step="5" oninput="debouncedUpdate()"><span class="sv" id="hs-off-val">0% · 0 jobs</span></div>
         </div>
       </div>
     </div>
@@ -339,19 +366,20 @@
         </div>
         <div>
           <div class="field-label">% we source (from pool)</div>
-          <div class="sl"><input type="range" id="ls-src" min="0" max="100" value="0" step="5" oninput="update()"><span class="sv" id="ls-src-val">0% · 0 jobs</span></div>
+          <div class="sl"><input type="range" id="ls-src" min="0" max="100" value="0" step="5" oninput="debouncedUpdate()"><span class="sv" id="ls-src-val">0% · 0 jobs</span></div>
+          <div class="note" style="margin-top:2px;">Sourced roles carry placement fee instead of screen fee.</div>
         </div>
         <div>
           <div class="field-label">Avg salary — US</div>
-          <div class="sl"><input type="range" id="ls-sal-us" min="25" max="120" value="55" step="5" oninput="update()"><span class="sv" id="ls-sal-us-val">$55k</span></div>
+          <div class="sl"><input type="range" id="ls-sal-us" min="25" max="120" value="55" step="5" oninput="debouncedUpdate()"><span class="sv" id="ls-sal-us-val">$55k</span></div>
         </div>
         <div>
           <div class="field-label">Avg salary — Offshore</div>
-          <div class="sl"><input type="range" id="ls-sal-off" min="10" max="60" value="20" step="5" oninput="update()"><span class="sv" id="ls-sal-off-val">$20k</span></div>
+          <div class="sl"><input type="range" id="ls-sal-off" min="10" max="60" value="20" step="5" oninput="debouncedUpdate()"><span class="sv" id="ls-sal-off-val">$20k</span></div>
         </div>
         <div style="grid-column:span 2;">
           <div class="field-label">% offshored</div>
-          <div class="sl"><input type="range" id="ls-off" min="0" max="100" value="0" step="5" oninput="update()"><span class="sv" id="ls-off-val">0% · 0 jobs</span></div>
+          <div class="sl"><input type="range" id="ls-off" min="0" max="100" value="0" step="5" oninput="debouncedUpdate()"><span class="sv" id="ls-off-val">0% · 0 jobs</span></div>
         </div>
       </div>
     </div>
@@ -364,13 +392,13 @@
     <div class="card">
       <div class="slbl">Volume Discount (Subscription)</div>
       <div style="margin-bottom:12px;">
-        <div class="field-label">Discount threshold (jobs/yr)</div>
-        <div class="sl"><input type="range" id="volThresh" min="3" max="90" value="24" step="1" oninput="update()"><span class="sv" id="volThreshVal">24 jobs/yr</span></div>
+        <div class="field-label">Recruiting fee discount threshold (jobs/yr)</div>
+        <div class="sl"><input type="range" id="volThresh" min="3" max="90" value="24" step="1" oninput="debouncedUpdate()"><span class="sv" id="volThreshVal">24 jobs/yr</span></div>
         <div class="note" id="volThreshNote">At or above this volume, discount applies.</div>
       </div>
       <div>
         <div class="field-label">Discount amount</div>
-        <div class="sl"><input type="range" id="volDiscount" min="0" max="90" value="20" step="5" oninput="update()"><span class="sv" id="volDiscountVal">20%</span></div>
+        <div class="sl"><input type="range" id="volDiscount" min="0" max="90" value="20" step="5" oninput="debouncedUpdate()"><span class="sv" id="volDiscountVal">20%</span></div>
         <div class="note" id="volDiscNote"></div>
       </div>
     </div>
@@ -380,15 +408,15 @@
       <div class="note" style="margin-bottom:10px;">Monthly fee billed for every month the account is active. Discount applies above the threshold.</div>
       <div style="margin-bottom:10px;">
         <div class="field-label">Monthly fee</div>
-        <div class="sl"><input type="range" id="pfMonthly" min="0" max="1000" value="100" step="25" oninput="update()"><span class="sv" id="pfMonthlyVal">$100/mo</span></div>
+        <div class="sl"><input type="range" id="pfMonthly" min="0" max="1000" value="100" step="25" oninput="debouncedUpdate()"><span class="sv" id="pfMonthlyVal">$100/mo</span></div>
       </div>
       <div style="margin-bottom:10px;">
-        <div class="field-label">Discount threshold (jobs/yr)</div>
-        <div class="sl"><input type="range" id="pfDiscountThresh" min="1" max="36" value="12" step="1" oninput="update()"><span class="sv" id="pfDiscountThreshVal">12 jobs/yr</span></div>
+        <div class="field-label">Platform fee discount threshold (jobs/yr)</div>
+        <div class="sl"><input type="range" id="pfDiscountThresh" min="1" max="36" value="12" step="1" oninput="debouncedUpdate()"><span class="sv" id="pfDiscountThreshVal">12 jobs/yr</span></div>
       </div>
       <div>
         <div class="field-label">Discount above threshold</div>
-        <div class="sl"><input type="range" id="pfDiscount" min="0" max="50" value="20" step="5" oninput="update()"><span class="sv" id="pfDiscountVal">20%</span></div>
+        <div class="sl"><input type="range" id="pfDiscount" min="0" max="50" value="20" step="5" oninput="debouncedUpdate()"><span class="sv" id="pfDiscountVal">20%</span></div>
       </div>
     </div>
 
@@ -424,9 +452,12 @@
   <!-- ══ RESULTS ══ -->
   <div style="display:flex;flex-direction:column;gap:16px;">
 
+    <!-- Blended effective rate bar -->
+    <div class="blended-bar" id="blendedRateBar"></div>
+
     <div class="result-card">
       <h2 id="tableTitle1">Commitment Scenarios — Screen Only</h2>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;" id="tableSubtitle1">All roles screened. No sourcing. Screen fees only.</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;" id="tableSubtitle1">We screen every applicant you receive. Fee is charged per role as % of first-year salary.</div>
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;">
         <div>
           <table class="stbl" id="screenOnlyTbl"></table>
@@ -451,18 +482,19 @@
     <div class="mb">
       <div class="result-card">
         <h2>DIY Recruiting Assumptions</h2>
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:12px;">Customize these to match your customer's actual costs — they drive the Market Benchmarks comparison.</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;">
           <div>
             <div class="field-label">Recruiter hourly rate</div>
-            <div class="sl"><input type="range" id="recHourly" min="25" max="150" value="60" step="5" oninput="update()"><span class="sv" id="recHourlyVal">$60/hr</span></div>
+            <div class="sl"><input type="range" id="recHourly" min="25" max="150" value="60" step="5" oninput="debouncedUpdate()"><span class="sv" id="recHourlyVal">$60/hr</span></div>
           </div>
           <div>
             <div class="field-label">Hours spent per hire</div>
-            <div class="sl"><input type="range" id="recHours" min="10" max="120" value="40" step="5" oninput="update()"><span class="sv" id="recHoursVal">40 hrs</span></div>
+            <div class="sl"><input type="range" id="recHours" min="10" max="120" value="40" step="5" oninput="debouncedUpdate()"><span class="sv" id="recHoursVal">40 hrs</span></div>
           </div>
           <div>
             <div class="field-label">Job ad spend / role</div>
-            <div class="sl"><input type="range" id="adSpend" min="0" max="1000" value="300" step="50" oninput="update()"><span class="sv" id="adSpendVal">$300</span></div>
+            <div class="sl"><input type="range" id="adSpend" min="0" max="1000" value="300" step="50" oninput="debouncedUpdate()"><span class="sv" id="adSpendVal">$300</span></div>
           </div>
         </div>
       </div>
@@ -477,6 +509,10 @@
 </div>
 
 <script>
+// ── Debounce utility ────────────────────────────────────────────────────────
+let _updateTimer;
+function debouncedUpdate() { clearTimeout(_updateTimer); _updateTimer = setTimeout(update, 16); }
+
 const S = {
   totalJobs: 24, appPerJob: 60, qualRate: 10,
   screenPct: 1,
@@ -511,6 +547,7 @@ function setSvcMode(v) {
   S.serviceMode = v;
   act('svcModeTg', ['screen','fullservice'].indexOf(v));
   document.getElementById('fullServiceControls').style.display = v === 'fullservice' ? 'flex' : 'none';
+  document.getElementById('fullServiceCallout').style.display = v === 'fullservice' ? 'block' : 'none';
   update();
 }
 function act(id, i) { document.getElementById(id).querySelectorAll('button').forEach((b,j) => b.classList.toggle('active', i===j)); }
@@ -691,14 +728,11 @@ function update() {
     : 'Commitment Scenarios — Screen Only';
   document.getElementById('tableSubtitle1').textContent = isFullService
     ? `Full service: ${S.fullServicePct}% of agency fee (${fmtF(tradRecruiterFee)}/role at 25%) = ${fmtF(feePerRoleFS)}/role. Covers all sourcing, screening, and recruiting activities.`
-    : 'All roles screened. No sourcing. Screen fees only.';
+    : 'We screen every applicant you receive. Fee is charged per role as % of first-year salary.';
 
   document.getElementById('tableTitle2').textContent = isFullService
     ? 'Commitment Scenarios — Full Service (With Sourcing)'
     : 'Commitment Scenarios — With Sourcing';
-  document.getElementById('tableSubtitle2').textContent = isFullService
-    ? `Full service: ${S.fullServicePct}% of agency fee (${fmtF(tradRecruiterFee)}/role at 25%) = ${fmtF(feePerRoleFS)}/role. Covers all sourcing, screening, and recruiting activities.`
-    : '';
 
   // ── Calc scenarios ──
   const bundleMult = 1 + S.bundlePremium / 100;
@@ -717,6 +751,21 @@ function update() {
   const totalSrc = Math.round(T * S.hs.pct / 100 * S.hs.src / 100) + Math.round(T * S.ls.pct / 100 * S.ls.src / 100);
   const totalOff = Math.round(T * S.hs.pct / 100 * S.hs.off / 100) + Math.round(T * S.ls.pct / 100 * S.ls.off / 100);
 
+  // Table 2 subtitle
+  if (!isFullService) {
+    const srcPct2 = Math.round((S.hs.pct / 100 * S.hs.src / 100 + S.ls.pct / 100 * S.ls.src / 100) * 100);
+    const sub2El = document.getElementById('tableSubtitle2');
+    if (totalSrc > 0) {
+      sub2El.textContent = `${totalSrc} of ${T} roles sourced from Replicant's pool (${srcPct2}% of total). Sourced fees replace screen fees for those roles.`;
+      sub2El.style.color = '';
+    } else {
+      sub2El.innerHTML = `<span style="color:var(--accent);font-weight:600;">Tables are identical — set '% we source' in the segment cards above to model sourcing economics.</span>`;
+    }
+  } else {
+    document.getElementById('tableSubtitle2').textContent =
+      `Full service: ${S.fullServicePct}% of agency fee (${fmtF(tradRecruiterFee)}/role at 25%) = ${fmtF(feePerRoleFS)}/role. Covers all sourcing, screening, and recruiting activities.`;
+  }
+
   function pills(list) {
     return list.map(([t,c]) => `<span class="badge ${c}" style="margin-right:3px;margin-top:3px;">${t}</span>`).join('');
   }
@@ -724,32 +773,44 @@ function update() {
   function renderTable(elId, rows) {
     const hasSourcing = rows.some(r => r.sourceFees > 0);
     const hasFullService = rows.some(r => r.fullServiceFees > 0);
+    const anySourcing = rows.some(r => r.sourceFees > 0);
+    let firstDataRow = true;
     document.getElementById(elId).innerHTML =
       `<thead><tr>
         <th style="width:28%">Scenario</th>
         ${hasFullService ? `<th class="r">Full Service Fee</th>` : ''}
         <th class="r">Screen Fees</th>
         <th class="r">Sourced Fees</th>
-        <th class="r">Platform Fee</th>
+        <th class="r" data-tip="Billed for estimated months of platform use based on hiring cadence — adjusts with the avg hires/month slider">Platform Fee</th>
         <th class="r">Total</th>
-        <th class="r">Avg / Hire</th>
-        <th class="r">Implied / Qual Cand.</th>
+        <th class="r" data-tip="Total scenario cost (recruiting fees + platform fee) divided by number of roles hired. Bundle divides by actual hires needed, not package size.">Avg / Hire</th>
+        <th class="r" data-tip="Total recruiting fees ÷ (applicants/job × qual rate × jobs). Back-calculated cost per qualified candidate seen.">Cost / Qual. Candidate</th>
         <th></th>
       </tr></thead><tbody>` +
       rows.map(sc => {
         const totalLabel = sc.isBundleNote
-          ? `<span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">3-role package · ${fmtF(sc.acv/12)}/mo equiv.</div>`
+          ? `<span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">3-role package · ${fmtF(sc.acv/12)}/mo if annualized</div>`
           : `<span class="big">${fmt(sc.acv)}</span><div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${fmtF(sc.acv / 12)}/mo</div>`;
         const pfPct = sc.acv > 0 ? Math.round(sc.pfeeTotal / sc.acv * 100) : 0;
         const pfLabel = sc.pfeeMonthly > 0
           ? `${fmtF(sc.pfeeTotal)}<div style="font-size:0.7rem;color:var(--muted);">${fmtF(sc.pfeeMonthly)}/mo · ${pfPct}% of total</div>`
           : '—';
         const bundleStruck = sc.isBundleNote && T > 3;
+        // Sourced fees cell: show prompt only on first row when no sourcing configured
+        let sourcedCell;
+        if (sc.sourceFees > 0) {
+          sourcedCell = `<span style="color:#059669;font-weight:700;">${fmtF(sc.sourceFees)}</span>`;
+        } else if (!anySourcing && firstDataRow) {
+          sourcedCell = `<span style="color:#059669;font-weight:700;"><span style="font-size:0.7rem;color:var(--muted);font-style:italic;">configure above ↑</span></span>`;
+        } else {
+          sourcedCell = `<span style="color:#059669;font-weight:700;">—</span>`;
+        }
+        if (!sc.isBundleNote || T <= 3) firstDataRow = false;
         return `<tr class="${sc.hl ? 'hl' : ''}" style="${bundleStruck ? 'opacity:0.45;text-decoration:line-through;' : ''}">
           <td><strong>${sc.name}</strong>${bundleStruck ? '<div style="font-size:0.7rem;color:var(--muted);text-decoration:none;margin-top:3px;">Not applicable — hiring more than 3 roles</div>' : ''}<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;">${pills(sc.pills)}</div></td>
           ${hasFullService ? `<td class="r"><span style="color:#7c3aed;font-weight:700;">${sc.fullServiceFees > 0 ? fmtF(sc.fullServiceFees) : '—'}</span></td>` : ''}
           <td class="r">${sc.screenFees > 0 ? fmtF(sc.screenFees) : '—'}</td>
-          <td class="r"><span style="color:#059669;font-weight:700;">${sc.sourceFees > 0 ? fmtF(sc.sourceFees) : '—'}</span></td>
+          <td class="r">${sourcedCell}</td>
           <td class="r">${pfLabel}</td>
           <td class="r">${totalLabel}</td>
           <td class="r">${fmtF(sc.perHire)}${sc.isBundleNote ? `<div style="font-size:0.7rem;color:var(--muted);">pkg ÷ ${Math.min(T,3)}</div>` : ''}</td>
@@ -822,13 +883,6 @@ function update() {
       ? `${totalSrc} of ${T} roles sourced from Replicant's pool (${srcPct}% of total). Sourced fees replace screen fees for those roles.`
       : 'No sourcing configured — adjust "% we source" sliders above to see sourcing economics.');
 
-  if (!isFullService) {
-    document.getElementById('tableSubtitle2').textContent =
-      totalSrc > 0
-        ? `${totalSrc} of ${T} roles sourced from Replicant's pool (${srcPct}% of total). Sourced fees replace screen fees for those roles.`
-        : 'No sourcing configured — adjust "% we source" sliders above to see sourcing economics.';
-  }
-
   function calcBreakEven(annual, od) {
     const annualRPH = annual.recruit / T;
     const odRPH     = od.recruit / T;
@@ -839,7 +893,7 @@ function update() {
   }
 
   const qualNote = `<span style="color:var(--muted);">Implied cost / qual candidate: ${S.appPerJob} applicants/job × ${S.qualRate}% qual rate = ${qualPerJob} qual/job · ${totalQual} total across ${T} roles.</span>`;
-  function beBox(msg) { return `<div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#166534;font-size:0.78rem;">⚖️ <strong>Break-even:</strong> ${msg}</div>`; }
+  function beBox(msg) { return `<div style="margin-top:8px;padding:10px 14px;background:var(--be-bg);border:1px solid var(--be-border);border-radius:8px;color:var(--be-text);font-size:0.78rem;">⚖️ <strong>Break-even:</strong> ${msg}</div>`; }
 
   const srcFootnote = totalSrc > 0
     ? `<div style="margin-top:6px;font-size:0.7rem;color:var(--muted);">* Sourced fees replace both screen and platform fees for those roles — customer pays the placement fee only, not double.</div>`
@@ -847,6 +901,21 @@ function update() {
 
   document.getElementById('qualCandidateNoteSO').innerHTML = qualNote + beBox(calcBreakEven(soAnnual, soOD));
   document.getElementById('qualCandidateNote').innerHTML   = qualNote + beBox(calcBreakEven(subAnnual, odPerHire)) + srcFootnote;
+
+  // ── Blended effective rate bar ──
+  const blendedSalK = blendedSal / 1000;
+  const effScreenRateNum = soAnnual.screenFees > 0 && T > 0 ? (soAnnual.screenFees / T) / blendedSal * 100 : 0;
+  const effSourceRateNum = subAnnual.sourceFees > 0 && T > 0 ? (subAnnual.sourceFees / T) / blendedSal * 100 : 0;
+  const screenPerHire = T > 0 ? soAnnual.screenFees / T : 0;
+  const sourcePerHire = T > 0 ? subAnnual.sourceFees / T : 0;
+  let blendedBarHtml = `<span class="bl-item"><span class="bl-label">Blended salary:</span> <span class="bl-val">$${Math.round(blendedSalK)}k</span></span>`;
+  blendedBarHtml += ` <span style="color:var(--border);padding:0 4px;">|</span> `;
+  blendedBarHtml += `<span class="bl-item"><span class="bl-label">Effective screen rate:</span> <span class="bl-val">${effScreenRateNum.toFixed(1)}% of salary</span> <span class="bl-label">→ ${fmtF(screenPerHire)}/hire</span></span>`;
+  if (effSourceRateNum > 0) {
+    blendedBarHtml += ` <span style="color:var(--border);padding:0 4px;">|</span> `;
+    blendedBarHtml += `<span class="bl-item"><span class="bl-label">Effective source rate:</span> <span class="bl-val">${effSourceRateNum.toFixed(1)}% of salary</span> <span class="bl-label">→ ${fmtF(sourcePerHire)}/hire</span></span>`;
+  }
+  document.getElementById('blendedRateBar').innerHTML = blendedBarHtml;
 
   // ── Benchmarks ── (blendedSal and tradRecruiterFee computed earlier)
   function dl(ours, theirs) {
@@ -903,7 +972,26 @@ function snapshotState() {
   return snap;
 }
 
+// ── Banner utility ──────────────────────────────────────────────────────────
+function showBanner(msg) {
+  const el = document.createElement('div');
+  el.className = 'snap-banner';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 400);
+  }, 3000);
+}
+
 function applySnapshot(snap) {
+  // Check for missing fields and show banner if needed
+  const expectedFields = ['pfMonthly', 'bundlePremium', 'fullServicePct'];
+  const missingFields = expectedFields.filter(f => snap[f] === undefined || snap[f] === null);
+  if (missingFields.length > 0) {
+    showBanner('Some fields used defaults — this config was saved before recent updates.');
+  }
+
   // Apply all slider/select values from saved state
   const setSlider = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
   setSlider('totalJobs',    Math.min(snap.totalJobs, 1000));
@@ -963,6 +1051,10 @@ function saveConfig() {
   const name = currentConfigName || document.getElementById('cfgName').value.trim();
   if (!name) { alert('Enter a config name first.'); return; }
   const configs = getConfigs();
+  // If name exists but is NOT the currently loaded config, confirm before overwrite
+  if (configs[name] && name !== currentConfigName) {
+    if (!confirm(`Overwrite existing config '${name}'?`)) return;
+  }
   configs[name] = snapshotState();
   setConfigs(configs);
   currentConfigName = name;
@@ -994,6 +1086,49 @@ function deleteConfig() {
   refreshDropdown();
 }
 
+function exportConfigs() {
+  const configs = getConfigs();
+  const json = JSON.stringify(configs, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'replicant-configs.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
+function importConfigs() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/json,.json';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      let imported;
+      try { imported = JSON.parse(ev.target.result); } catch { alert('Invalid JSON file.'); return; }
+      const existing = getConfigs();
+      const collisions = Object.keys(imported).filter(n => existing[n]);
+      let proceed = true;
+      if (collisions.length > 0) {
+        proceed = confirm(`Overwrite ${collisions.length} existing config(s)?\n${collisions.join(', ')}`);
+      }
+      if (!proceed) return;
+      const merged = Object.assign({}, existing, imported);
+      setConfigs(merged);
+      refreshDropdown();
+      showBanner(`Imported ${Object.keys(imported).length} config(s) successfully.`);
+    };
+    reader.readAsText(file);
+  };
+  document.body.appendChild(input);
+  input.click();
+  setTimeout(() => document.body.removeChild(input), 100);
+}
+
 refreshDropdown();
 
 // ── Tooltip ────────────────────────────────────────────────────────────────
@@ -1006,9 +1141,11 @@ document.addEventListener('mouseover', e => {
 });
 document.addEventListener('mousemove', e => {
   if (tip.style.opacity !== '1') return;
-  const x = e.clientX + 14, y = e.clientY + 14;
-  const overRight = x + 290 > window.innerWidth;
-  tip.style.left = (overRight ? e.clientX - 290 : x) + 'px';
+  let x = e.clientX + 14, y = e.clientY + 14;
+  const tw = tip.offsetWidth;
+  if (x + tw + 12 > window.innerWidth) x = window.innerWidth - tw - 12;
+  if (y + tip.offsetHeight + 8 > window.innerHeight) y = y - tip.offsetHeight - 20;
+  tip.style.left = x + 'px';
   tip.style.top  = y + 'px';
 });
 document.addEventListener('mouseout', e => {
