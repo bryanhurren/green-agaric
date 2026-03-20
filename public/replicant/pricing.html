@@ -178,7 +178,7 @@
       <button onclick="setSvcMode('fullservice')">Full Service (Source + Screen)</button>
     </div>
     <div id="fullServiceControls" style="display:none;align-items:center;gap:12px;flex:1;">
-      <div style="font-size:0.8rem;color:var(--muted);">Full-service fee:</div>
+      <div style="font-size:0.8rem;color:var(--muted);">% of Traditional Agency Recruiter fee:</div>
       <input type="range" id="fullServicePct" min="10" max="100" value="60" step="5" oninput="update()" style="flex:1;max-width:180px;">
       <span class="sv" id="fullServicePctVal" style="min-width:160px;" data-tip="Full service charges this % of what a traditional agency recruiter (25% of 1st yr salary) would charge per role. E.g. 60% means we charge 60% of the agency fee — still a significant discount.">60% of agency fee/role</span>
     </div>
@@ -528,7 +528,7 @@ function cph({ mode, salaryK, gm, rm, cm, vm }) {
 
 // ── Total fee for a given commit multiplier, vol mult, and platform months ─
 // screenOnly: if true, forces all jobs through screen mode (ignores src %)
-// In full-service mode, fee per role = fullServicePct% × DIY cost per hire × cm × vm
+// In full-service mode, fee per role = fullServicePct% × traditional agency recruiter fee (blended sal × 25%) × cm × vm
 function calcTotal(cm, vm, platformMonths, platformDiscountMult, screenOnly) {
   const T = S.totalJobs;
   const gm = G_MULT[S.guarantee];
